@@ -42,10 +42,20 @@ int procura_inicio(no_avl *no, char inicio)
 /*** problema 1.2 ***/
 char* seleciona_por_ordem(heap *h, int k)
 {
-	if(h == NULL)
+	if(!h || k <= 0 || k>h->tamanho){
 		return NULL;
+	}
+	
+	elemento aux[k];
+    for(int i = 0; i < k; i++)
+    {
+        aux[i].prioridade = h->elementos[1]->prioridade;
+        aux[i].valor = heap_remove(h);
+    }
+    for(int i = 0; i < k; i++)
+        heap_insere(h, aux[i].valor, aux[i].prioridade);
 
-	return NULL;
+    return aux[k-1].valor;
 }
 /****************************************************/
 /*     Funcoes ja implementadas (nao modificar)     */
