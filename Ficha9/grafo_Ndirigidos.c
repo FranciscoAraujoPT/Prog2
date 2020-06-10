@@ -57,11 +57,12 @@ int grafo_adiciona(grafo *g, int origem, int dest)
 
     if((g->adjacencias[origem][dest] == 1) && (g->adjacencias[dest][origem] == 1)){
         return 0;
-    } else {
-        g->adjacencias[origem][dest] = 1;
-        g->adjacencias[dest][origem] = 1;
-        return 1;
     }
+        
+    g->adjacencias[origem][dest] = 1;
+    g->adjacencias[dest][origem] = 1;
+    return 1;
+    
 }
 
 /* remove do grafo g a aresta entre os vertices origem e destino
@@ -80,11 +81,12 @@ int grafo_remove(grafo *g, int origem, int dest)
 
     if((g->adjacencias[origem][dest] == 0) && (g->adjacencias[dest][origem] == 0)){
         return 0;
-    } else {
-        g->adjacencias[origem][dest] = 0;
-        g->adjacencias[dest][origem] = 0;
-        return 1;
     }
+    
+    g->adjacencias[origem][dest] = 0;
+    g->adjacencias[dest][origem] = 0;
+    return 1;
+    
 }
 
 /* testa no grafo g a aresta entre os vertices origem e destino
