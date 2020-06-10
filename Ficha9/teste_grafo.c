@@ -1,4 +1,4 @@
-#include "grafo.h"
+#include "grafo_Ndirigidos.h"
 #include <stdio.h>
 
 int main()

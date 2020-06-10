@@ -256,4 +256,3 @@ void grafo_imprime(grafo* g)
         printf("\n");
     }
 }
-
