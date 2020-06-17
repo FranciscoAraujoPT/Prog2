@@ -195,9 +195,13 @@ int grafo_completo(grafo* g)
         return -1;
     }
 
-    for(int i=0;i<g->tamanho;i++){
-        if((vetor_tamanho(grafo_arestasSaida(g,i))) != (g->tamanho-1)){
-            return 0;
+    // complexidade: O(g->tamanho^2)
+    for(int i = 0; i < g->tamanho; i++)
+    {
+        for(int j = 0; j < i; j++)
+        {
+            if(!g->adjacencias[i][j] && !g->adjacencias[j][i])
+                return 0;
         }
     }
     return 1;
