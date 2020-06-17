@@ -195,12 +195,12 @@ int grafo_completo(grafo* g)
         return -1;
     }
 
-    // complexidade: O(g->tamanho^2)
+    // complexidade: ?
     for(int i = 0; i < g->tamanho; i++)
     {
         for(int j = 0; j < i; j++)
         {
-            if(!g->adjacencias[i][j] && !g->adjacencias[j][i])
+            if(!g->adjacencias[i][j] || !g->adjacencias[j][i])
                 return 0;
         }
     }
