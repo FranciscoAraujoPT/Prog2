@@ -47,8 +47,20 @@ void grafo_apaga(grafo* g)
 int grafo_adiciona(grafo *g, int origem, int dest)
 {
     /* alinea 1.1 */
+    if(g == NULL){
+        return -1;
+    }
 
-    return -1;
+    if((origem < 0) || (dest < 0) || (origem > g->tamanho-1) || (dest > g->tamanho-1)){
+        return -1;
+    }
+
+    if(g->adjacencias[origem][dest] == 1){
+        return 0;
+    } 
+    
+    g->adjacencias[origem][dest] = 1;
+    return 1;
 }
 
 /* remove do grafo g a aresta entre os vertices origem e destino
@@ -57,8 +69,21 @@ int grafo_adiciona(grafo *g, int origem, int dest)
 int grafo_remove(grafo *g, int origem, int dest)
 {
     /* alinea 1.1 */
+    if(g == NULL){
+        return -1;
+    }
 
-    return -1;
+    if((origem < 0) || (dest < 0) || (origem > g->tamanho-1) || (dest > g->tamanho-1)){
+        return -1;
+    }
+
+    if(g->adjacencias[origem][dest] == 0){
+        return 0;
+    }
+
+    g->adjacencias[origem][dest] = 0;
+    return 1;
+    
 }
 
 /* testa no grafo g a aresta entre os vertices origem e destino
@@ -67,8 +92,16 @@ int grafo_remove(grafo *g, int origem, int dest)
 int grafo_aresta(grafo *g, int origem, int dest)
 {
      /* alinea 1.1 */
+    if(g == NULL){
+        return -1;
+    }
 
-    return 0;
+    if((origem < 0) || (dest < 0) || (origem > g->tamanho-1) || (dest > g->tamanho-1)){
+        return -1;
+    }
+
+    return g->adjacencias[origem][dest];
+
 }
 
 /* cria um novo grafo com base numa lista de adjacencias
@@ -78,8 +111,32 @@ int grafo_aresta(grafo *g, int origem, int dest)
 grafo* grafo_deLista(int* adjacencias, int n_arestas)
 {
     /* alinea 1.2 */
+    if(adjacencias == NULL || (n_arestas < 1)){
+        return NULL;
+    }
 
-    return NULL;
+    int i, tamanho = adjacencias[0];
+    for(int i = 1; i < 2*n_arestas; i++)
+    {
+        if(adjacencias[i] > tamanho)
+            tamanho = adjacencias[i];
+    }
+    tamanho += 1;
+    
+    grafo* g = grafo_novo(tamanho);
+    
+    if(g == NULL){
+        return NULL;
+    }
+
+    for(i=0;i<n_arestas;i++){
+        if(grafo_adiciona(g, adjacencias[2*i], adjacencias[2*i+1]) == -1){
+            grafo_apaga(g);
+            return NULL;
+        }
+    }
+
+    return g;
 }
 
 /* cria e retorna um vetor de inteiros contendo os vertices
@@ -87,8 +144,22 @@ grafo* grafo_deLista(int* adjacencias, int n_arestas)
 vetor* grafo_arestasSaida(grafo* g, int i)
 {
     /* alinea 1.3 */
+    vetor* v=vetor_novo();
+    
+    if(v == NULL){
+        return NULL;
+    }
 
-    return NULL;
+    for(int j=0;j<g->tamanho;j++){
+        if(g->adjacencias[i][j] == 1){
+            if(vetor_insere(v, j, -1)==-1){
+                vetor_apaga(v);
+                return NULL; 
+            }
+        }
+    }
+
+    return v;
 }
 
 /* cria e retorna um vetor de inteiros contendo os vertices
@@ -96,8 +167,22 @@ vetor* grafo_arestasSaida(grafo* g, int i)
 vetor* grafo_arestasEntrada(grafo* g, int i)
 {
     /* alinea 1.3 */
+    vetor* v=vetor_novo();
+    
+    if(v == NULL){
+        return NULL;
+    }
 
-    return NULL;
+    for(int j=0;j<g->tamanho;j++){
+        if(g->adjacencias[j][i] == 1){
+            if(vetor_insere(v, j, -1)==-1){
+                vetor_apaga(v);
+                return NULL; 
+            }
+        }
+    }
+
+    return v;
 }
 
 /* verifica se o grafo g e' completo
@@ -106,8 +191,16 @@ vetor* grafo_arestasEntrada(grafo* g, int i)
 int grafo_completo(grafo* g)
 {
     /* alinea 1.4 */
+    if(g == NULL){
+        return -1;
+    }
 
-    return 0;
+    for(int i=0;i<g->tamanho;i++){
+        if((vetor_tamanho(grafo_arestasSaida(g,i))) != (g->tamanho-1)){
+            return 0;
+        }
+    }
+    return 1;
 }
 
 /* verifica se o vertice i do grafo g e' uma celebridade
@@ -116,6 +209,12 @@ int grafo_completo(grafo* g)
 int grafo_eCelebridade(grafo* g, int i)
 {
     /* alinea 1.5 */ 
+    if(g == NULL || (i < 0)){
+        return -1;
+    }
+    if(((vetor_tamanho(grafo_arestasSaida(g,i))) == 0) && (vetor_tamanho(grafo_arestasEntrada(g,i)) == (g->tamanho-1))){
+        return 1;
+    }
 
     return 0;
 }
@@ -126,6 +225,15 @@ int grafo_eCelebridade(grafo* g, int i)
 int grafo_temCelebridade(grafo* g)
 {
     /* alinea 1.5 */ 
+    if(g == NULL){
+        return -1;
+    }
+
+    for(int i=0;i<g->tamanho;i++){
+        if(grafo_eCelebridade(g,i)){
+            return 1;
+        }
+    }
 
     return 0;
 }
@@ -149,4 +257,3 @@ void grafo_imprime(grafo* g)
         printf("\n");
     }
 }
-
