@@ -90,6 +90,7 @@ int main() {
     
     clock_t inicio, fim, inicioTab, fimTab;
     double tempo;
+    char* s[]={"who"};
 
     printf("Ler para lista ligada - ");
     int tamanho_lista;
@@ -130,5 +131,6 @@ int main() {
     printf("tempo em segundos: %lf\n", tempo);
     printf("#elementos: %d\n\n", tabela_numelementos(td_djbm));
 
+    tabela_valor(td_djbm, *s);
     printf("\nFIM\n");
 }

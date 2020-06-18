@@ -152,6 +152,20 @@ const char* tabela_valor(tabela_dispersao *td, const char *chave)
 {
     /* exercicio 1.2 */
 
+    if(td == NULL || chave == NULL){
+        return NULL;
+    }
+
+    int indice = td->hfunc(chave, td->tamanho);
+    printf("indice=%d\n", indice);
+    elemento *elem = td->elementos[indice];
+    while(elem != NULL)
+    {
+        printf("chave=%s\t\tValor=%s\n", elem->obj->chave,elem->obj->valor);
+        elem=elem->proximo;
+    }
+
+
     return NULL;
 }
 
