@@ -195,21 +195,17 @@ int grafo_completo(grafo* g)
         return -1;
     }
 
-    static int j=0;
-    // complexidade: ?
-    for(int i = j+1; i < g->tamanho; i++)
-    {
-        if(!g->adjacencias[i][j] || !g->adjacencias[j][i]){
-            return 0;
-        }
-        
-    }
-        
-    if(j<g->tamanho){
-        j++;
-        return grafo_completo(g);
-    }
+    int i, j;
 
+    // complexidade: O(g->tamanho^2)
+    for(i=0; i < g->tamanho; i++)
+    {
+        for(j=0;j<i;j++)
+        {
+            if(!g->adjacencias[i][j] || !g->adjacencias[j][i])
+                return 0;
+        }
+    }
     return 1;
 }
 
@@ -222,11 +218,19 @@ int grafo_eCelebridade(grafo* g, int i)
     if(g == NULL || (i < 0)){
         return -1;
     }
-    if(((vetor_tamanho(grafo_arestasSaida(g,i))) == 0) && (vetor_tamanho(grafo_arestasEntrada(g,i)) == (g->tamanho-1))){
-        return 1;
-    }
 
-    return 0;
+    // complexidade: O(n)
+    for(int j = 0; j < g->tamanho; j++)
+    {
+        if(j == i){
+            continue;
+        }
+
+        if(g->adjacencias[i][j] || !g->adjacencias[j][i]){
+            return 0;
+        }
+    }
+    return 1;
 }
 
 /* verifica se o grafo g tem pelo menos uma celebridade
@@ -239,6 +243,7 @@ int grafo_temCelebridade(grafo* g)
         return -1;
     }
 
+    // complexidade: O(n²)
     for(int i=0;i<g->tamanho;i++){
         if(grafo_eCelebridade(g,i)){
             return 1;

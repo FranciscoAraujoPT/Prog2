@@ -3,7 +3,7 @@
 
 int main()
 {
-	int i, adj[] = {1,2,1,3,1,4,2,5,3,5,4,5}, comp[] = {0,1,1,0,1,2,2,1,0,2,2,0};
+	int i, adj[] = {1,2,1,3,1,4,2,5,3,5,4,5}, comp[] = {0,1,0,2,0,3,1,0,1,2,1,3,2,0,2,1,2,3,3,0,3,1,3,2};
 	int comp2[] = {0,1,0,2,0,3,0,4,1,4,2,4,3,4};
 
 	/* exemplo da alinea 1.2 
@@ -42,7 +42,7 @@ int main()
 	grafo_apaga(g);
 
 	printf("\nTeste 6:\n");//Testa a função grafo_completo.	
-	grafo *gcomp = grafo_deLista(comp, 6);
+	grafo *gcomp = grafo_deLista(comp, 12);
 	grafo_imprime(gcomp);
 	if(grafo_completo(gcomp)==1){
 		printf("O grafo está completo.\n");
