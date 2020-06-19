@@ -4,8 +4,9 @@
 #include <string.h>
 #include "tabdispersao.h"
 
-#define NOME_FICHEIRO "teste2.txt"
-#define TAMANHO_TAB_DISP 1000
+#define NOME_FICHEIRO "englishwords.txt"
+#define TAMANHO_TAB_DISP 100000
+#define NUMERO_TESTES 5
 
 elemento *ler_para_lista(const char *nomef, int *tamanho)
 {
@@ -63,7 +64,6 @@ tabela_dispersao *ler_para_tabela(const char *nomef, int tamanho, hash_func *hfu
     if(f == NULL){
         return NULL;
     }
-
     tabela_dispersao *td = tabela_nova(tamanho, hfunc);
     
     if(td == NULL){
@@ -80,7 +80,6 @@ tabela_dispersao *ler_para_tabela(const char *nomef, int tamanho, hash_func *hfu
 
         tabela_adiciona(td, palavra, palavra);
     }
-
     fclose(f);
 
     return td;
@@ -171,31 +170,51 @@ int main() {
     printf("tempo em segundos: %lf\n", tempo);
     printf("#elementos: %d\n\n", tabela_numelementos(td_djbm));
 
-    for(int i=1;i<=5;i++)
+    printf("Ler para tabela de dispersao (hash_krm) - ");
+    inicio = clock();
+
+    tabela_dispersao *td_krm = ler_para_tabela(NOME_FICHEIRO, TAMANHO_TAB_DISP, hash_krm);
+    if(td_krm == NULL){
+        printf("erro a ler para tabela de dispersao\n");
+        return -1;
+    }
+    fim = clock();
+
+    tempo = (double)(fim - inicio) / CLOCKS_PER_SEC;
+    
+    printf("tempo em segundos: %lf\n", tempo);
+    printf("#elementos: %d\n\n", tabela_numelementos(td_krm));
+
+    for(int i=1;i<=NUMERO_TESTES;i++)
     {
         const char* s=Chave_random(lst,&tamanho_lista);
         
-        printf("Teste %d- pesquisa na lista:\n", i);
+        printf("Teste %d- pesquisa na lista:\n\n", i);
         inicio = clock();
 
         if(lista_pesquisa(lst, s) == NULL){
-            printf("\tNa tabela de dispersão (hash_djbm) a chave \"%s\" tem o valor NULL.\n", s);
+            printf("\tNa lista a chave \"%s\" tem o valor NULL.\n", s);
         } else {
-            printf("\tNa tabela de dispersão (hash_djbm) a chave \"%s\" tem o valor \"%s\".\n", s, lista_pesquisa(lst, s));
+            printf("\tNa lista a chave \"%s\" tem o valor \"%s\".\n", s, lista_pesquisa(lst, s));
         }
         fim = clock();
         tempo = (double)(fim - inicio) / CLOCKS_PER_SEC;
         
         printf("\tTempo em segundos: %lf\n", tempo);
 
-        printf("\nTeste %d- pesquisa na tabela de dispersão (hash_djbm):\n", i);
+        printf("\nTeste %d- pesquisa na tabela de dispersão (hash_djbm):\n\n", i);
+        
         inicio = clock();
+        printf("\tNa tabela de dispersão (hash_djbm) a chave \"%s\" tem o valor \"%s\".\n", s, tabela_valor(td_djbm, s));
+        fim = clock();
+        tempo = (double)(fim - inicio) / CLOCKS_PER_SEC;
+        
+        printf("\tTempo em segundos: %lf\n\n", tempo);
+        
+        printf("\nTeste %d- pesquisa na tabela de dispersão (hash_krm):\n\n", i);
 
-        if(tabela_valor(td_djbm, s) == NULL){
-            printf("\tNa tabela de dispersão (hash_djbm) a chave \"%s\" tem o valor NULL.\n", s);
-        } else {
-            printf("\tNa tabela de dispersão (hash_djbm) a chave \"%s\" tem o valor \"%s\".\n", s, tabela_valor(td_djbm, s));
-        }
+        inicio = clock();
+        printf("\tNa tabela de dispersão (hash_krm) a chave \"%s\" tem o valor \"%s\".\n", s, tabela_valor(td_krm, s));
         fim = clock();
         tempo = (double)(fim - inicio) / CLOCKS_PER_SEC;
         

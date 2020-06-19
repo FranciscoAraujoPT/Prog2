@@ -66,7 +66,6 @@ int tabela_adiciona(tabela_dispersao *td, const char *chave, const char *valor)
 
     /* calcula hash para a string a adicionar */
     index = td->hfunc(chave, td->tamanho);
-
     /* verifica se chave ja' existe na lista */
     elem = td->elementos[index];
     while (elem != NULL && strcmp(elem->obj->chave, chave) != 0)
@@ -252,8 +251,15 @@ objeto * tabela_elementos(tabela_dispersao *td, int *n)
 unsigned long hash_krm(const char* chave, int tamanho)
 {
 	/* exercicio 1.3 */
+    unsigned long i=0, hash=7;
+    
+    while(chave[i])
+    {
+        hash = hash + (int)chave[i];
+        i++;
+    }
 
-    return 0;
+    return hash % tamanho;
 }
 
 unsigned long hash_djbm(const char* chave, int tamanho)
