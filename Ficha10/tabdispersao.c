@@ -168,7 +168,6 @@ const char* tabela_valor(tabela_dispersao *td, const char *chave)
         }
         elem=elem->proximo;
     }
-
     return NULL;
 }
 
