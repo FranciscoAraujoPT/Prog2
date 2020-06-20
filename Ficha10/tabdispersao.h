@@ -143,6 +143,14 @@ unsigned long hash_krm(const char* chave, int tamanho);
 unsigned long hash_djbm(const char *chave, int tamanho);
 
 /**
+ * \brief Altera a hast da tabela de dispersão.
+ * \param td tabela de dispersao.
+ * \param hash_func apontador para funcao de dispersao a ser usada nesta tabela.
+ * \return A função deve retornar 0 se for bem sucedida e -1 caso contrário.
+ */
+int tabela_alterahash(tabela_dispersao *td, hash_func *hfunc);
+
+/**
  * Esta funcao imprime o estado actual da tabela para o ecra
  * \param td tabela a ser mostrada no ecra
  */

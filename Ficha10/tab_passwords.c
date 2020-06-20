@@ -44,6 +44,13 @@ int main()
         return -1;
     }
 
+    mostraTabela(td_djbm);
+
+    if(tabela_alterahash(td_djbm, hash_krm) == 0) {
+        mostraTabela(td_djbm);
+    }
+
+
     char user[TAMANHO_CHAVE], pass[TAMANHO_VALOR];
     
     printf("Login: ");
@@ -59,6 +66,6 @@ int main()
     }
 
     tabela_apaga(td_djbm);
-    
+
     return 0;
 }

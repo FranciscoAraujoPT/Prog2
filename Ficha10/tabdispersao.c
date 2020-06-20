@@ -277,6 +277,68 @@ unsigned long hash_djbm(const char* chave, int tamanho)
     return h % tamanho;
 }
 
+int tabela_alterahash(tabela_dispersao *td, hash_func *hfunc)
+{
+    if(td == NULL || hfunc == NULL){
+        return -1;
+    }
+
+    int i, nelementos=0;
+    elemento *inicio = NULL, *anterior = NULL, *aux;
+    
+    for (i=0;i<td->tamanho;i++)
+    {
+        if (td->elementos[i]){
+            aux = td->elementos[i];
+            while (aux)
+            {
+                objeto *obj = (objeto *)malloc(sizeof(objeto));
+                elemento *elem = (elemento *)malloc(sizeof(elemento));
+                
+                strcpy(obj->chave, aux->obj->chave); 
+                strcpy(obj->valor, aux->obj->valor);
+
+                elem->obj=obj;
+                elem->proximo=aux->proximo;
+
+                if(nelementos == 0){
+                    inicio = elem;
+                } else {
+                    anterior->proximo = elem;
+                }
+
+                anterior = elem;
+
+                aux = aux->proximo;
+                nelementos++;
+
+            }
+        }
+    }
+    
+    if(tabela_esvazia(td) == -1){
+        return -1;
+    }
+
+    td->hfunc=hfunc;
+    elemento*aux2=inicio;
+    
+    for(i=0;i<nelementos;i++)
+    {
+        tabela_adiciona(td,inicio->obj->chave, inicio->obj->valor);
+        inicio = inicio->proximo;
+    }
+
+    for(i=0;i<nelementos;i++)
+    {
+        aux = aux2;
+        aux2 = aux2->proximo;
+        free(aux->obj); 
+        free(aux);
+    }
+
+    return 0;  
+}
 /*================================================================================*/
 void mostraTabela(tabela_dispersao *td)
 {
