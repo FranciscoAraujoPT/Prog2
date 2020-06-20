@@ -4,8 +4,8 @@
 #include <string.h>
 #include "tabdispersao.h"
 
-#define NOME_FICHEIRO "englishwords.txt"
-#define TAMANHO_TAB_DISP 100000
+#define NOME_FICHEIRO "teste2.txt"
+#define TAMANHO_TAB_DISP 1000
 #define NUMERO_TESTES 5
 
 elemento *ler_para_lista(const char *nomef, int *tamanho)
@@ -53,7 +53,27 @@ elemento *ler_para_lista(const char *nomef, int *tamanho)
     return inicio;
 }
 
-tabela_dispersao *ler_para_tabela(const char *nomef, int tamanho, hash_func *hfunc){
+void apaga_lista(elemento* lst, int tamanho)
+{
+    if(lst == NULL){
+        return;
+    }
+
+    int i;
+    elemento* aux;
+
+    for(i=0;i<tamanho;i++)
+    {
+        aux = lst;
+        lst = lst->proximo;
+        free(aux->obj);
+        free(aux); 
+    }
+    
+}
+
+tabela_dispersao *ler_para_tabela(const char *nomef, int tamanho, hash_func *hfunc)
+{
     
     if(nomef == NULL){
         return NULL;
@@ -102,7 +122,8 @@ const char *lista_pesquisa(elemento *inicio, const char *chave)
     return NULL;
 }
 
-const char* Chave_random(elemento* lst, int *tamanho){
+const char* Chave_random(elemento* lst, int tamanho)
+{
 
     if(lst == NULL){
         return NULL;
@@ -116,7 +137,7 @@ const char* Chave_random(elemento* lst, int *tamanho){
         rand();
     }
 
-    nRandon = rand() % *tamanho;
+    nRandon = rand() % tamanho;
     
     for(i=0;i<nRandon;i++)
     {
@@ -126,7 +147,8 @@ const char* Chave_random(elemento* lst, int *tamanho){
     return lst->obj->chave;
 }
 
-int main() {
+int main() 
+{
     
     clock_t inicio, fim;
     double tempo;
@@ -187,7 +209,7 @@ int main() {
 
     for(int i=1;i<=NUMERO_TESTES;i++)
     {
-        const char* s=Chave_random(lst,&tamanho_lista);
+        const char* s=Chave_random(lst, tamanho_lista);
         
         printf("Teste %d- pesquisa na lista:\n\n", i);
         inicio = clock();
@@ -220,5 +242,10 @@ int main() {
         
         printf("\tTempo em segundos: %lf\n\n", tempo);
     }
+
+    apaga_lista(lst, tamanho_lista);
+    tabela_apaga(td_djbm);
+    tabela_apaga(td_krm);
+    
     printf("FIM\n");
 }
