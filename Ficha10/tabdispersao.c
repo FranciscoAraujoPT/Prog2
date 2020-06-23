@@ -284,7 +284,7 @@ int tabela_alterahash(tabela_dispersao *td, hash_func *hfunc)
     }
 
     int i, nelementos=0;
-    elemento *inicio = NULL, *anterior = NULL, *aux;
+    elemento *inicio = NULL, *aux, *aux2 = NULL;
     
     for (i=0;i<td->tamanho;i++)
     {
@@ -304,27 +304,35 @@ int tabela_alterahash(tabela_dispersao *td, hash_func *hfunc)
                 if(nelementos == 0){
                     inicio = elem;
                 } else {
-                    anterior->proximo = elem;
+                    aux2->proximo = elem;
+                    printf("%d\t%d\t%d\n", &elem, &elem->obj, &inicio);
                 }
 
-                anterior = elem;
-
+                aux2 = elem;
                 aux = aux->proximo;
                 nelementos++;
 
             }
         }
     }
-    
+    aux2 = inicio;
+    for(i=0;i<nelementos;i++)
+    {
+        printf("i=%d: %s\t%s\n", i+1, aux2->obj->chave, aux2->obj->valor);
+        aux2=aux2->proximo;
+        printf("======================\n");
+    }
+
     if(tabela_esvazia(td) == -1){
         return -1;
     }
 
     td->hfunc=hfunc;
-    elemento*aux2=inicio;
+    aux2=inicio;
     
     for(i=0;i<nelementos;i++)
     {
+        printf("i=%d: %s\t%s\n", i+1, inicio->obj->chave, inicio->obj->valor);
         tabela_adiciona(td,inicio->obj->chave, inicio->obj->valor);
         inicio = inicio->proximo;
     }

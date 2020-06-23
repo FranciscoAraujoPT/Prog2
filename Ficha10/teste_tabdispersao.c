@@ -4,8 +4,8 @@
 #include <string.h>
 #include "tabdispersao.h"
 
-#define NOME_FICHEIRO "teste2.txt"
-#define TAMANHO_TAB_DISP 1000
+#define NOME_FICHEIRO "englishwords.txt"
+#define TAMANHO_TAB_DISP 100000
 #define NUMERO_TESTES 5
 
 elemento *ler_para_lista(const char *nomef, int *tamanho)
