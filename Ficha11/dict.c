@@ -3,8 +3,6 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
-#include <stdlib.h>
-#include <unistd.h>
 
 
 
@@ -99,8 +97,7 @@ char* verifica_texto(arvore_avl * dict, char *str, int *len) {
 
   while((palavra=isola_palavra(str, len)) != NULL)
   {
-    char *aux2 = (char*) malloc(sizeof(char)*MAX_WORD);
-    
+    char aux2[*len+1];
 
     for(i=0;i<(*len);i++)
     {
