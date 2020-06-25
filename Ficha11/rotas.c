@@ -5,18 +5,107 @@
 #include "grafo.h"
 #include "heap.h"
 
+#define MAX_HEAP 25
+
 int proximas_n_chegadas(lista *tempos, lista *origens, lista *aeroportos, int n)
 {
 	/* alinea 4.1 */
-    
-    return 0;
+	if(tempos == NULL){
+		return 0;
+	}
+
+    if(origens == NULL){
+		return 0;
+	}
+
+	if(aeroportos == NULL){
+		return 0;
+	}
+
+	if(n<0 || n>25){
+		return 0;
+	}
+
+	int i=0;
+	heap* h = heap_nova(MAX_HEAP);
+	l_elemento* ori = origens->inicio;
+	l_elemento* t = tempos->inicio;
+	l_elemento* aer = aeroportos->inicio;
+	char* palavra;
+
+	while(ori && t && aer)
+	{
+		/*Pesquisa na lista aeroporto pelo aeroporto correto atraves do indice dado pela lista origens*/
+		for(i=0;i<atoi(ori->str);i++)
+		{
+			aer=aer->proximo;
+		}
+
+		heap_insere(h, aer->str, atoi(t->str));
+		ori = ori->proximo;
+		t = t->proximo;
+		aer = aeroportos->inicio;
+	}
+
+	for(i=0;i<n;i++)
+	{
+		palavra = heap_remove(h);
+		printf("%d: %s\n", i+1, palavra);
+	}
+
+    return 1;
 }
 
 lista* pesquisa_destinos (grafo *rotas, lista *aeroportos, const char *origem)
 {
 	/* alinea 4.2 */
+	if(rotas == NULL){
+		return NULL;
+	}
 
-	return NULL;
+	if(aeroportos == NULL){
+		return NULL;
+	}
+
+	if(origem == NULL){
+		return NULL;
+	}	
+
+	lista* lst = lista_nova();
+
+	if(lst == NULL){
+		return NULL;
+	}
+
+	l_elemento* aer = aeroportos->inicio;
+	int indice=0;
+
+	while(aer)
+	{
+		if(strcmp(origem,aer->str) == 0){
+			break;
+		}
+		indice++;
+		aer = aer->proximo;
+	}
+	
+
+	lista_no* aux = rotas->adjacencias[indice].inicio;
+
+    while (aux)
+    {
+		if(aux->vertice >= 0){
+			aer = aeroportos->inicio;
+			for(int j=0;j<aux->vertice;j++)
+			{
+				aer=aer->proximo;
+			}
+			lista_insere(lst, aer->str, NULL);
+		}
+		aux = aux->proximo;
+    }
+
+	return lst;
 }
 
 /* Aqui começa o código de teste. Não modificar! */
