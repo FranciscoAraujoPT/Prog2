@@ -11,13 +11,28 @@
 # 	rm avl.o
 
 #####Ex2#####
-all: eventos
+# all: eventos
 
-eventos: heap.o
-	gcc eventos.c heap.o -g -Wall
+# eventos: heap.o
+# 	gcc eventos.c heap.o -g -Wall
 
-heap.o:
-	gcc -c heap.c -g -Wall
+# heap.o: heap.c heap.h
+# 	gcc -c heap.c -g -Wall
+
+# clear:
+# 	rm heap.o
+
+#####Ex3#####
+all: arvore
+
+arvore: lista.o avl.o
+	gcc arvore.c lista.o avl.o -g -Wall
+
+lista.o: lista.c lista.h
+	gcc -c lista.c -g -Wall
+
+avl.o: avl.c avl.h
+	gcc -c avl.c -g -Wall
 
 clear:
-	rm heap.o
+	rm lista.o avl.o
