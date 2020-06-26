@@ -7,6 +7,18 @@
 
 #define MAX_LINE 256
 #define MAX_HEAP 256
+#define RAIZ 1
+
+void heap_valor_free(heap* h){
+
+    if(h == NULL){
+        return;
+    }
+
+    free(h->elementos[1]->valor);
+    h->elementos[1]->valor = NULL;
+    heap_remove(h);
+}
 
 int pop_number(char *str) {
     int i = strlen(str) - 1;
@@ -24,27 +36,123 @@ int pop_number(char *str) {
     return ret;
 }
 
+int say_number(char *str) {
+    int i = strlen(str) - 1;
+    while(i >= 0 && isspace(str[i])) i--;
+
+    if(i < 0)
+        return -1;
+
+    while(i >= 0 && !isspace(str[i])) i--;
+    i++;
+
+    int ret = atoi(str + i);
+
+    return ret;
+}
+
 
 int le_eventos(FILE *f, heap *eventos_agendados) {
     
     /* alinea 2.1 */
+    if(f == NULL){
+        return 0;
+    }
 
-    return 0;
+    if(eventos_agendados == NULL){
+        return 0;
+    }
+    
+    char palavra[MAX_LINE];
+    int nEventos=0, prioridade;
+
+    while(fgets(palavra, MAX_LINE, f) != NULL)
+    {
+        pop_number(palavra);
+        palavra[strlen(palavra)-1] = '\0';
+        
+        prioridade = say_number(palavra);
+
+        heap_insere(eventos_agendados, palavra, prioridade);
+        nEventos++;
+    }
+
+    return nEventos;
 }
 
 int processa_tempo(int tempo, heap *eventos_agendados, heap *eventos_espera) {
 
     /* alinea 2.2 */
+    if(eventos_agendados == NULL){
+        return 0;
+    }
+    
+    if(eventos_espera == NULL){
+        return 0;
+    }
+    
+    if(tempo < 0){
+        return 0;
+    }
 
-    return 0;
+    int duracao, prioridade,nEventos=0;
+    char *palavra = NULL;
+    heap *aux = heap_nova(MAX_HEAP);
+
+
+    while(eventos_agendados->tamanho > 0)
+    {   
+        palavra = eventos_agendados->elementos[1]->valor;
+        prioridade = say_number(palavra);
+        duracao=say_number(palavra);
+        
+        if(duracao <= tempo)
+        {
+            prioridade = prioridade*-1;
+            pop_number(palavra);
+            palavra[strlen(palavra)-1] = '\0';
+            heap_insere(eventos_espera, palavra, prioridade);
+        } else {
+            heap_insere(aux, palavra, prioridade);
+        }
+        heap_valor_free(eventos_agendados);
+        
+        nEventos++;
+    }
+    
+    while(aux->tamanho > 0)
+    {
+        palavra = aux->elementos[1]->valor;
+        heap_insere(eventos_agendados, palavra, prioridade);
+        
+        heap_valor_free(aux);
+    }
+    
+    heap_apaga(aux);
+
+    return nEventos;
 }
-
+    
 char* proximo_evento(heap *eventos_espera, int *duracao) {
 
     /* alinea 2.3 */
+    if(eventos_espera == NULL){
+        return NULL;
+    }
 
+    if(duracao == NULL){
+        return NULL;
+    }
 
-    return NULL;
+    char *palavra;
+    
+    if((palavra = heap_remove(eventos_espera)) == NULL){
+        return NULL;
+    }
+    
+    *duracao = pop_number(palavra);
+
+    return palavra;
 }
 
 
@@ -55,7 +163,6 @@ void processa_eventos(heap *eventos_agendados){
     while(eventos_espera->tamanho || eventos_agendados->tamanho)
     {   
         processa_tempo(time, eventos_agendados, eventos_espera);
-
         if(eventos_espera->tamanho) {
             char * evento;
             int duracao;
@@ -67,7 +174,6 @@ void processa_eventos(heap *eventos_agendados){
         else
             time = eventos_agendados->elementos[1]->prioridade;
     }
-
     heap_apaga(eventos_espera);
 }
 

@@ -4,11 +4,31 @@
 #include "lista.h"
 #include "avl.h"
 
+void avl_em_ordem(no_avl* no, lista *lst)
+{
+    if(no == NULL){
+        return;
+	}
+
+    avl_em_ordem(no->esquerda, lst);
+	lista_insere(lst, no->str, NULL);
+	avl_em_ordem(no->direita, lst);
+	
+}
 
 void guarda_conteudo(arvore_avl *arvore, lista *lst)
 {
 	/* alinea 3.1 */
+	if(arvore == NULL){
+		return;
+	}
 
+	if (lst == NULL){
+		return;
+	}
+
+	avl_em_ordem(arvore->raiz, lst);
+	
 
 }
 
@@ -16,17 +36,31 @@ lista* descobre_segredo(arvore_avl *arvore, lista *indicacoes)
 {
 	/* alinea 3.2 */
 
-	return NULL;
+	no_avl* aux = arvore->raiz;
+	l_elemento* aux2 = indicacoes->inicio;
+
+	while(aux2 != NULL)
+	{
+		if(strcmp("esquerda", aux2->str) == 0){
+			aux = aux->esquerda;
+			strcpy(aux2->str, aux->str);
+		} else if(strcmp("direita", aux2->str) == 0){
+			aux = aux->direita;
+			strcpy(aux2->str, aux->str);
+		}
+		aux2 = aux2->proximo;
+	}
+
+	return indicacoes;
 }
 
 
-/* v-- nao alterar funcao main --v */
+/* v-- nao alterar funcao main --v */ /* R:. Eu altero se ela tiver erros -.-"*/ 
 
 int main()
 {
 	char data[][20] = { "prog2", "mt2", "trabalho", "e'", "muito", "zzzz...",
 						"dificil", "facil", "nada", "verdade"};
-	int i;
 	
 	{
 		arvore_avl *T;
@@ -77,7 +111,8 @@ int main()
 			for(i=0; i<res->tamanho; i++)
 				printf("%s ", lista_elemento(res, i)->str);
 		}
-		
+
+		lista_apaga(indicacoes);
 		avl_apaga(T);
 		printf("\n");
 	}
