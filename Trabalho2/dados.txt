@@ -1,0 +1,22 @@
+ANA\MARIA\How are you?
+MARIA\PEDRO\How are you?
+TERESA\ANA\How are you?
+TERESA\PEDRO\How are you?
+ANA\SUSANA\How are you?
+PEDRO\SUSANA\How are you?
+PEDRO\SUSANA\They do not!
+PEDRO\SUSANA\Let's go.
+PEDRO\SUSANA\Let's go.
+ANA\TERESA\Let's go.
+RUI\PEDRO\Let's go.
+RUI\ANA\Let's go.
+MAFALDA\ANA\Let's go.
+MAFALDA\ANA\Let's go.
+MAFALDA\ANA\Let's go.
+MAFALDA\ANA\Let's go.
+ANA\MAFALDA\Let's go.
+ANA\MAFALDA\Let's go.
+ANA\MAFALDA\Let's go.
+ANA\MAFALDA\Let's go.
+PEDRO\TERESA\Lets go.
+TERESA\MAFALDA\lets go.
