@@ -198,47 +198,18 @@ int grafo_completo(grafo* g)
         return -1;
     }
 
-    for(int i=0;i<g->tamanho;i++){
-        if((vetor_tamanho(grafo_arestasSaida(g,i))) != (g->tamanho-1)){
-            return 0;
+    int i, j;
+
+    // complexidade: O(g->tamanho^2)
+    for(i=0; i < g->tamanho; i++)
+    {
+        for(j=0;j<i;j++)
+        {
+            if(!g->adjacencias[i][j])
+                return 0;
         }
     }
     return 1;
-}
-
-/* verifica se o vertice i do grafo g e' uma celebridade
-   retorna -1 em caso de erro (parametros invalidos)
-   retorna 1 se o vertice for uma celebridade e 0 se nao o for */
-int grafo_eCelebridade(grafo* g, int i)
-{
-    /* alinea 1.5 */ 
-    if(g == NULL || (i < 0)){
-        return -1;
-    }
-    if(((vetor_tamanho(grafo_arestasSaida(g,i))) == 0) && (vetor_tamanho(grafo_arestasEntrada(g,i)) == (g->tamanho-1))){
-        return 1;
-    }
-
-    return 0;
-}
-
-/* verifica se o grafo g tem pelo menos uma celebridade
-   retorna -1 em caso de erro (parametros invalidos)
-   retorna 1 se existir uma celebridade e 0 se nao existir */
-int grafo_temCelebridade(grafo* g)
-{
-    /* alinea 1.5 */ 
-    if(g == NULL){
-        return -1;
-    }
-
-    for(int i=0;i<g->tamanho;i++){
-        if(grafo_eCelebridade(g,i)){
-            return 1;
-        }
-    }
-
-    return 0;
 }
 
 /* imprime as adjacencias do grafo */
