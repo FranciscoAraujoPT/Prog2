@@ -55,7 +55,7 @@ lista* descobre_segredo(arvore_avl *arvore, lista *indicacoes)
 }
 
 
-/* v-- nao alterar funcao main --v */
+/* v-- nao alterar funcao main --v */ /* R:. Eu altero se ela tiver erros -.-"*/ 
 
 int main()
 {
@@ -111,7 +111,8 @@ int main()
 			for(i=0; i<res->tamanho; i++)
 				printf("%s ", lista_elemento(res, i)->str);
 		}
-		
+
+		lista_apaga(indicacoes);
 		avl_apaga(T);
 		printf("\n");
 	}

@@ -1,14 +1,14 @@
 #####Ex1#####
-# all: dict
+all: dict
 
-# dict: avl.o
-# 	gcc dict.c avl.o -g -Wall
+dict: avl.o
+	gcc dict.c avl.o -g -Wall
 
-# avl.o: avl.c avl.h
-# 	gcc -c avl.c -g -Wall
+avl.o: avl.c avl.h
+	gcc -c avl.c -g -Wall
 
-# clear:
-# 	rm avl.o
+clear:
+	rm avl.o
 
 #####Ex2#####
 # all: eventos
@@ -38,19 +38,19 @@
 # 	rm lista.o avl.o
 
 #####Ex4#####
-all: rotas
+# all: rotas
 
-rotas: lista.o heap.o grafo.o
-	gcc rotas.c lista.o heap.o grafo.o -g -Wall
+# rotas: lista.o heap.o grafo.o
+# 	gcc rotas.c lista.o heap.o grafo.o -g -Wall
 
-lista.o: lista.c lista.h
-	gcc -c lista.c -g -Wall
+# lista.o: lista.c lista.h
+# 	gcc -c lista.c -g -Wall
 
-heap.o: heap.c heap.h
-	gcc -c heap.c -g -Wall
+# heap.o: heap.c heap.h
+# 	gcc -c heap.c -g -Wall
 
-grafo.o: grafo.c grafo.h
-	gcc -c grafo.c -g -Wall
+# grafo.o: grafo.c grafo.h
+# 	gcc -c grafo.c -g -Wall
 
-clear:
-	rm grafo.o heap.o lista.o
+# clear:
+# 	rm grafo.o heap.o lista.o

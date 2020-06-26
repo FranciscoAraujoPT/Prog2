@@ -49,9 +49,15 @@ int proximas_n_chegadas(lista *tempos, lista *origens, lista *aeroportos, int n)
 
 	for(i=0;i<n;i++)
 	{
-		palavra = heap_remove(h);
+		palavra = h->elementos[1]->valor;
 		printf("%d: %s\n", i+1, palavra);
+		free(h->elementos[1]->valor);
+		h->elementos[1]->valor = NULL;
+		heap_remove(h);
+		
 	}
+
+	heap_apaga(h);
 
     return 1;
 }
