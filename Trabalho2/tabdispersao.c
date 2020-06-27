@@ -105,14 +105,73 @@ int tabela_adiciona(tabela_dispersao *td, const char *remet,const char *dest, co
 
 int tabela_existe(tabela_dispersao *td, const char *remetente)
 {
-    return -1;
+    if(td == NULL){
+        return -1;
+    }
+
+    if(remetente == NULL){
+        return -1;
+    }
+
+    int nMsg = 0;
+    elemento *elem;
+
+    for(int i=0;i<td->tamanho;i++)
+    {
+        elem = td->elementos[i];
+        while(elem)
+        {
+            if(strcmp(elem->msg->remetente, remetente) == 0){
+                nMsg++;
+            }
+            elem = elem->proximo;
+        }
+    }  
+    
+    return nMsg;
 
   
 }
 
 mensagem **tabela_listagem(tabela_dispersao *td, const char *remetente)
 {
-    return NULL;
+    if(td == NULL){
+        return NULL;
+    }
+
+    if (remetente == NULL){
+        return NULL;
+    }
+   
+    mensagem **msg = (mensagem**) malloc(sizeof(mensagem) * (tabela_existe(td, remetente))); //Pensar em como melhorar...
+    
+    if(msg == NULL){
+        return NULL;
+    }
+     
+    int i, j=0;
+    elemento *elem;
+
+    for(i=0;i<td->tamanho;i++)
+    {
+        elem = td->elementos[i];
+        while(elem)
+        {
+            if(strcmp(elem->msg->remetente, remetente) == 0){
+                msg[j] = elem->msg;
+                j++;
+            }
+            elem = elem->proximo;
+        }
+    }
+
+    msg[j] = NULL; //garante que a primeira, em caso de inexistência de remetente, ou a ultima posição é NULL.
+    
+    if(j == 0){
+        return msg;
+    }
+
+    return msg;
 }
 
 int tabela_esvazia(tabela_dispersao *td)
@@ -217,8 +276,55 @@ tabela_dispersao* tabela_carrega(char *ficheiro,int tamanho)
 
 void ligacao2(tabela_dispersao *td, char *nomeU1, char *nomeU2, int totMsg[2])
 {
+    if(td == NULL){
+        printf("erro1\n");
+        return;
+    }
 
-   
+    if(nomeU1 == NULL){
+        printf("erro2\n");
+        return;
+    }
 
+    if(nomeU2 == NULL){
+        printf("erro3\n");
+        return;
+    }
 
+    if(totMsg == NULL){
+        printf("erro4\n");
+        return;
+    }
+
+    totMsg[0] = totMsg[1] = 0;
+    int existeU1 = 0, existeU2 = 0;
+    elemento *elem;
+
+    for(int i=0;i<td->tamanho;i++)
+    {
+        elem = td->elementos[i];
+        while(elem)
+        {
+            if(strcmp(elem->msg->remetente, nomeU1) == 0){
+                existeU1 = 1;
+                if(strcmp(elem->msg->destinatario, nomeU2) == 0){
+                    totMsg[0]++;                
+                }
+            } else if (strcmp(elem->msg->remetente, nomeU2) == 0){
+                existeU2 = 1;
+                if(strcmp(elem->msg->destinatario, nomeU1) == 0){
+                    totMsg[1]++;
+                }
+            }
+            elem = elem->proximo;
+        }
+    }  
+    
+    if(existeU1 == 0){
+        totMsg[0] = -1;
+    }
+
+    if (existeU2 == 0){
+        totMsg[1] = -1;
+    }
 }
