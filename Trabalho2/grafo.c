@@ -43,8 +43,6 @@ void no_apaga(no_grafo *no)
     free(no->nome_user);
     no->nome_user = NULL;
     free(no);
-    no = NULL;
-
 }
 
 void grafo_apaga(grafo* g)
@@ -62,28 +60,13 @@ void grafo_apaga(grafo* g)
         g->nos = NULL;
     }
     free(g);
-    g = NULL;
 }
 
 
-no_grafo * no_insere(grafo *g, char *user)
+no_grafo * cria_no(char *user)
 {
-
-    if(g == NULL){
-        return NULL;
-    }
-
     if(user == NULL){
         return NULL;
-    }
-
-    int i;
-
-    for(i=0;i<g->tamanho;i++)
-    {
-        if(strcmp(g->nos[i]->nome_user, user) == 0){
-            return NULL;
-        }
     }
 
     no_grafo *no = (no_grafo*) malloc(sizeof(no_grafo));
@@ -99,24 +82,68 @@ no_grafo * no_insere(grafo *g, char *user)
         return NULL;
     }
 
-    g->nos = (no_grafo**) realloc(g->nos, sizeof(no_grafo*)*(g->tamanho+1));
-
-    if(g->nos == NULL){
-        free(no);
-        free(no_user);
-        return NULL;
-    }
-
     strcpy(no_user, user);
     no->nome_user=no_user;
     no->tamanho = 0;
     no->ligacoes = NULL;
-    g->nos[g->tamanho] = no;
+
+    return no;
+}
+
+
+no_grafo * no_insere(grafo *g, char *user)
+{
+
+    if(g == NULL){
+        return NULL;
+    }
+
+    if(user == NULL){
+        return NULL;
+    }
+
+    for(int i=0;i<g->tamanho;i++)
+    {
+        if(strcmp(g->nos[i]->nome_user, user) == 0){
+            return NULL;
+        }
+    }
+    
+    no_grafo **aux = g->nos;
+    g->nos = (no_grafo**) realloc(g->nos, sizeof(no_grafo*)*(g->tamanho+1));
+
+    if(g->nos == NULL){
+        g->nos = aux;
+        return NULL;
+    }
+    
+    g->nos[g->tamanho] = cria_no(user);
     g->tamanho++;    
 
     return g->nos[g->tamanho-1];
 }
 
+ligacao * cria_lig(no_grafo *destino,int peso)
+{
+    if(destino == NULL){
+        return NULL;
+    }
+
+    if(peso < 0){
+        return NULL;
+    }
+
+    ligacao *lig = (ligacao*) malloc(sizeof(ligacao));
+    
+    if(lig == NULL){
+        return NULL;
+    }
+
+    lig->destino = destino;
+    lig->peso_ligacao = peso;
+
+    return lig;
+}
 
 int  cria_ligacao(no_grafo *origem, no_grafo *destino, int peso)
 {
@@ -132,33 +159,20 @@ int  cria_ligacao(no_grafo *origem, no_grafo *destino, int peso)
         return -1;
     }
 
-    
-    int i = 0;
-
-    while(origem->tamanho > i)
+    for(int i=0;i<origem->tamanho;i++)
     {
         if(strcmp(origem->ligacoes[i]->destino->nome_user, destino->nome_user) == 0){
             return -1;
         }
-        i++;
-    }
-
-    ligacao *lig = (ligacao*) malloc(sizeof(ligacao));
-    
-    if(lig == NULL){
-        return -1;
     }
 
     origem->ligacoes = (ligacao**) realloc(origem->ligacoes, sizeof(ligacao*)*(origem->tamanho+1));
 
     if(origem->ligacoes == NULL){
-        free(lig);
         return -1;
     }
-
-    lig->destino = destino;
-    lig->peso_ligacao = peso;
-    origem->ligacoes[i] = lig;
+    
+    origem->ligacoes[origem->tamanho] = cria_lig(destino, peso);
     origem->tamanho++;
 
     return 0;
@@ -176,14 +190,11 @@ no_grafo * encontra_no(grafo *g, char *nomeU)
         return NULL;
     }
 
-    int i = 0;
-
-    while (g->tamanho > i)
+    for(int i=0;i<g->tamanho;i++)
     {
         if(strcmp(g->nos[i]->nome_user, nomeU) == 0){
             return g->nos[i];
         }
-        i++;
     }
 
     return NULL;
@@ -207,7 +218,7 @@ grafo * criaGrafo(tabela_dispersao *td)
     elemento *elem;
     int i = 0, j = 0, msg[2];
 
-    while(td->tamanho > i){
+    for(i=0;i<td->tamanho;i++){
         elem = td->elementos[i];
         while(elem)
         {   
@@ -215,13 +226,13 @@ grafo * criaGrafo(tabela_dispersao *td)
             no_insere(g, elem->msg->destinatario);
             elem = elem->proximo;
         }
-        i++;
     }
 
-    i=0;
-    while(g->tamanho > i)
+    i = 0;
+
+    for(i=0;i<g->tamanho;i++)
     {
-        while(g->tamanho > j)
+        for(j=0;j<g->tamanho;j++)
         {   
             if(j == i){
                 j++;
@@ -237,10 +248,7 @@ grafo * criaGrafo(tabela_dispersao *td)
             if(msg[1]>0){
                 cria_ligacao(g->nos[j], g->nos[i], msg[1]);
             }
-            j++;
         }
-        j=0;
-        i++;
     }
 
     return g;
@@ -262,26 +270,29 @@ no_grafo **lista_amigos(grafo *g, char *nomeU, int *n)
         return NULL;
     }
 
-    no_grafo ** amigos = (no_grafo**) malloc(sizeof(no_grafo));
+    no_grafo ** amigos = (no_grafo**) malloc(sizeof(no_grafo*));
+
+    if(amigos == NULL){
+        return NULL;
+    }
+
     no_grafo * amigo;
     int i = 0, j = 0, amigo1 = 0;
     *n = 0;
 
-    while (g->tamanho > i)
+    for(i=0;i<g->tamanho;i++)
     {
         if(strcmp(g->nos[i]->nome_user, nomeU) == 0){
-            while(g->nos[i]->tamanho > j)
+            for(j=0;j<g->nos[i]->tamanho;j++)
             {
                 if(g->nos[i]->ligacoes[j]->peso_ligacao >= 4){
                     amigo1 = 1;
                     amigo = g->nos[i]->ligacoes[j]->destino;
                 }
-                j++;
             }
             
             if(amigo1 == 1){
-                j = 0;
-                while(amigo->tamanho > j)
+                for(j=0;j<amigo->tamanho;j++)
                 {
                     if(strcmp(amigo->ligacoes[j]->destino->nome_user, nomeU) == 0){
                         if(amigo->ligacoes[j]->peso_ligacao >= 4){
@@ -292,10 +303,8 @@ no_grafo **lista_amigos(grafo *g, char *nomeU, int *n)
                             (*n)++;
                         }
                     }
-                    j++;
                 }
             }
-
             if((*n) > 0){
                 return amigos;
             } else {
@@ -303,7 +312,6 @@ no_grafo **lista_amigos(grafo *g, char *nomeU, int *n)
                 return NULL;
             }
         }
-       i++;
     }
 
     free(amigos);
