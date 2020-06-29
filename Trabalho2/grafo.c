@@ -16,18 +16,36 @@ grafo* grafo_novo()
         return NULL;
     }
 
-    g->nos = (no_grafo**) malloc(sizeof(no_grafo));
-    
-    if(g->nos == NULL){
-        free(g);
-        return NULL;
-    }
-
+    g->nos = NULL;
     g->tamanho = 0;
 
     return g;
 }
 
+void no_apaga(no_grafo *no)
+{
+    if(no == NULL){
+        return;
+    }
+
+    if(no->tamanho > 0){
+        
+        for(int i=0;i<no->tamanho;i++)
+        {
+            free(no->ligacoes[i]);
+            no->ligacoes[i] = NULL;
+        }
+    
+        free(no->ligacoes);
+        no->ligacoes = NULL;
+    }
+
+    free(no->nome_user);
+    no->nome_user = NULL;
+    free(no);
+    no = NULL;
+
+}
 
 void grafo_apaga(grafo* g)
 {
@@ -35,32 +53,16 @@ void grafo_apaga(grafo* g)
         return;
     }
 
-    int j = 0;
-
     if(g->tamanho > 0){
         for (int i=0;i<g->tamanho;i++)
         {
-            while(g->nos[i]->tamanho > j)
-            {
-                ligacao* aux = g->nos[i]->ligacoes[j];
-                free(aux);
-                aux = NULL;
-                j++;
-            }
-            j=0;
-            ligacao ** aux2 = g->nos[i]->ligacoes;
-            char *aux3 = g->nos[i]->nome_user;
-            no_grafo *aux4 = g->nos[i];
-                free(aux2);
-                aux2 = NULL;
-                free(aux3);
-                aux3 = NULL;
-                free(aux4);
-                aux4 = NULL;
+            no_apaga(g->nos[i]);
         }
         free(g->nos);
+        g->nos = NULL;
     }
     free(g);
+    g = NULL;
 }
 
 
@@ -75,20 +77,11 @@ no_grafo * no_insere(grafo *g, char *user)
         return NULL;
     }
 
-    int i = 0;
+    int i;
 
-    while (g->tamanho > i)
+    for(i=0;i<g->tamanho;i++)
     {
         if(strcmp(g->nos[i]->nome_user, user) == 0){
-            return NULL;
-        }
-        i++;
-    }
-    
-    if(g->tamanho > 0){
-        g->nos = (no_grafo**) realloc(g->nos, sizeof(no_grafo)*i);
-
-        if(g->nos == NULL){
             return NULL;
         }
     }
@@ -106,9 +99,9 @@ no_grafo * no_insere(grafo *g, char *user)
         return NULL;
     }
 
-    ligacao **lig = (ligacao**) malloc(sizeof(ligacao));
+    g->nos = (no_grafo**) realloc(g->nos, sizeof(no_grafo*)*(g->tamanho+1));
 
-    if(lig == NULL){
+    if(g->nos == NULL){
         free(no);
         free(no_user);
         return NULL;
@@ -117,11 +110,11 @@ no_grafo * no_insere(grafo *g, char *user)
     strcpy(no_user, user);
     no->nome_user=no_user;
     no->tamanho = 0;
-    no->ligacoes = lig;
-    g->nos[i] = no;
-    g->tamanho++;
+    no->ligacoes = NULL;
+    g->nos[g->tamanho] = no;
+    g->tamanho++;    
 
-    return g->nos[i];
+    return g->nos[g->tamanho-1];
 }
 
 
@@ -149,18 +142,17 @@ int  cria_ligacao(no_grafo *origem, no_grafo *destino, int peso)
         }
         i++;
     }
-    
-    if(origem->tamanho > 0){
-        origem->ligacoes = (ligacao**) realloc(origem->ligacoes, sizeof(ligacao)*i);//Porque que preciso disto??
-
-        if(origem->ligacoes == NULL){
-            return -1;
-        }
-    }
 
     ligacao *lig = (ligacao*) malloc(sizeof(ligacao));
     
     if(lig == NULL){
+        return -1;
+    }
+
+    origem->ligacoes = (ligacao**) realloc(origem->ligacoes, sizeof(ligacao*)*(origem->tamanho+1));
+
+    if(origem->ligacoes == NULL){
+        free(lig);
         return -1;
     }
 
@@ -235,6 +227,7 @@ grafo * criaGrafo(tabela_dispersao *td)
                 j++;
                 continue;
             }
+
             ligacao2(td, g->nos[i]->nome_user, g->nos[j]->nome_user, msg);
 
             if(msg[0]>0){
@@ -249,7 +242,7 @@ grafo * criaGrafo(tabela_dispersao *td)
         j=0;
         i++;
     }
-    printf("\nFIM\n");
+
     return g;
 }
 
@@ -319,34 +312,34 @@ no_grafo **lista_amigos(grafo *g, char *nomeU, int *n)
 
 no_grafo * ajuda_identifica_ciclo(no_grafo **ciclo, int *n)
 {
-    // int i = 0;
+    int i = 0;
 
-    // while(ciclo[*n]->tamanho > i)
-    // {
-    //     ciclo[*n+1] = ciclo[*n]->ligacoes[i]->destino;
-    //     printf("x: %s\t", ciclo[0]->nome_user);
-    //     if(ciclo[*n]->ligacoes[i]->destino == ciclo[0]){
-    //         printf("3:%s\t", ciclo[*n]->nome_user);
-    //         return ciclo[*n];
-    //     }
+    while(ciclo[*n]->tamanho >= i)
+    {
+        ciclo[*n+1] = ciclo[*n]->ligacoes[i]->destino;
+        printf("x: %s\t", ciclo[0]->nome_user);
+        if(ciclo[*n]->ligacoes[i]->destino == ciclo[0]){
+            printf("3:%s\t", ciclo[*n]->nome_user);
+            return ciclo[*n];
+        }
         
-    //     i++;
+        i++;
         
-    //     if(ciclo[*n]->tamanho = i-1){
-    //         (*n)++;
-    //         for(int j=0;j<ciclo[*n]->tamanho;j++)
-    //         {
-    //             ciclo[*n+1] = ciclo[*n]->ligacoes[j]->destino;
-    //             if(ajuda_identifica_ciclo(ciclo, n) != NULL){
-    //                 printf("2:%s\t", ciclo[*n]->nome_user);
-    //                 break;
-    //             }
+        if(ciclo[*n]->tamanho == i){
+            (*n)++;
+            for(int j=0;j<ciclo[*n]->tamanho;j++)
+            {
+                ciclo[*n+1] = ciclo[*n]->ligacoes[j]->destino;
+                if(ajuda_identifica_ciclo(ciclo, n) != NULL){
+                    printf("2:%s\t", ciclo[*n]->nome_user);
+                    break;
+                }
 
-    //         }
-    //         (*n)--;
-    //         i = 0;
-    //     }
-    // }
+            }
+            (*n)--;
+            i = 0;
+        }
+    }
 
     return NULL;
 }
@@ -354,21 +347,21 @@ no_grafo * ajuda_identifica_ciclo(no_grafo **ciclo, int *n)
 
 no_grafo ** identifica_ciclo(grafo *g, char *nomeU, int M, int *n)
 {
-    if(g == NULL){
-        return NULL;
-    }
+    // if(g == NULL){
+    //     return NULL;
+    // }
 
-    if(nomeU == NULL){
-        return NULL;
-    }
+    // if(nomeU == NULL){
+    //     return NULL;
+    // }
 
-    if(n == NULL){
-        return NULL;
-    }
+    // if(n == NULL){
+    //     return NULL;
+    // }
 
-    if(M < 3){
-        return NULL;
-    }
+    // if(M < 3){
+    //     return NULL;
+    // }
 
     // no_grafo ** ciclo = (no_grafo**) malloc(sizeof(no_grafo)*M);
 
