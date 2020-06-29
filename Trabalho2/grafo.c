@@ -7,6 +7,20 @@
 #include <string.h>
 #include "grafo.h"
 
+void imprime_grafo(no_grafo **g)
+{
+    if(g == NULL){
+        return;
+    }
+
+    int i = 0;
+
+    while(g)
+    {
+        printf("%d: %s\n", i, g[i]->nome_user);
+        i++;
+    }
+}
 
 grafo* grafo_novo()
 {
@@ -37,21 +51,26 @@ void grafo_apaga(grafo* g)
 
     int j = 0;
 
-    if(g->nos != NULL){
+    if(g->tamanho > 0){
         for (int i=0;i<g->tamanho;i++)
         {
-            while(g->nos[i]->ligacoes[j])
+            while(g->nos[i]->tamanho > j)
             {
                 ligacao* aux = g->nos[i]->ligacoes[j];
-                j++;
                 free(aux);
+                aux = NULL;
+                j++;
             }
+            j=0;
             ligacao ** aux2 = g->nos[i]->ligacoes;
             char *aux3 = g->nos[i]->nome_user;
             no_grafo *aux4 = g->nos[i];
                 free(aux2);
+                aux2 = NULL;
                 free(aux3);
+                aux3 = NULL;
                 free(aux4);
+                aux4 = NULL;
         }
         free(g->nos);
     }
@@ -74,26 +93,43 @@ no_grafo * no_insere(grafo *g, char *user)
 
     while (g->tamanho > i)
     {
-        printf("2:%s\t%s\n",g->nos[i]->nome_user, user);
         if(strcmp(g->nos[i]->nome_user, user) == 0){
             return NULL;
         }
         i++;
     }
+    
+    if(g->tamanho > 0){
+        g->nos = (no_grafo**) realloc(g->nos, sizeof(no_grafo)*i);
+
+        if(g->nos == NULL){
+            return NULL;
+        }
+    }
 
     no_grafo *no = (no_grafo*) malloc(sizeof(no_grafo));
-    
+
     if(no == NULL){
         return NULL;
     }
 
     char *no_user = (char*) malloc(sizeof(char)*(strlen(user)+1));
+
+    if(no_user == NULL){
+        free(no);
+        return NULL;
+    }
+
     ligacao **lig = (ligacao**) malloc(sizeof(ligacao));
+
+    if(lig == NULL){
+        free(no);
+        free(no_user);
+        return NULL;
+    }
 
     strcpy(no_user, user);
     no->nome_user=no_user;
-    //printf("\nposição= %d\n", i);
-    //printf("3:%s\t%s\n",no->nome_user, user);
     no->tamanho = 0;
     no->ligacoes = lig;
     g->nos[i] = no;
@@ -128,14 +164,22 @@ int  cria_ligacao(no_grafo *origem, no_grafo *destino, int peso)
         i++;
     }
     
-    ligacao *lig = (ligacao*) malloc(sizeof(ligacao));
+    if(origem->tamanho > 0){
+        origem->ligacoes = (ligacao**) realloc(origem->ligacoes, sizeof(ligacao)*i);//Porque que preciso disto??
 
+        if(origem->ligacoes == NULL){
+            return -1;
+        }
+    }
+
+    ligacao *lig = (ligacao*) malloc(sizeof(ligacao));
+    
     if(lig == NULL){
         return -1;
     }
 
     lig->destino = destino;
-    lig->peso_ligacao = peso; 
+    lig->peso_ligacao = peso;
     origem->ligacoes[i] = lig;
     origem->tamanho++;
 
@@ -156,16 +200,12 @@ no_grafo * encontra_no(grafo *g, char *nomeU)
 
     int i = 0;
 
-    if(g->tamanho == 0){
-        return NULL;
-    } else {
-        while (g->tamanho > i)
-        {
-            if(strcmp(g->nos[i]->nome_user, nomeU) == 0){
-                return g->nos[i];
-            }
-            i++;
+    while (g->tamanho > i)
+    {
+        if(strcmp(g->nos[i]->nome_user, nomeU) == 0){
+            return g->nos[i];
         }
+        i++;
     }
 
     return NULL;
@@ -187,35 +227,44 @@ grafo * criaGrafo(tabela_dispersao *td)
     }
 
     elemento *elem;
-    no_grafo *origem, *dest;
-    int i = 0, msg[2];
+    int i = 0, j = 0, msg[2];
+
     while(td->tamanho > i){
         elem = td->elementos[i];
-        //printf("i=%d\n", i);
         while(elem)
         {   
-            origem = no_insere(g, elem->msg->remetente);
-            dest = no_insere(g, elem->msg->destinatario);
-            
-            if(origem != NULL && dest != NULL){
-                ligacao2(td, origem->nome_user, dest->nome_user, msg); // verificar
-                //printf("msg1 = %d\n", msg[0]);
-                if(msg[0]>0){
-                    cria_ligacao(origem, dest, msg[0]);
-                }
-                //printf("msg2 = %d\n", msg[1]);
-                if(msg[1]>0){
-                    cria_ligacao(dest, origem, msg[1]);
-                }
-            }
-
+            no_insere(g, elem->msg->remetente);
+            no_insere(g, elem->msg->destinatario);
             elem = elem->proximo;
-            //printf("================================\n");
         }
-        //printf("%s\n", g->nos[0]->nome_user);
         i++;
     }
-    printf("\nFIM\n");
+
+    i=0;
+    while(g->tamanho > i)
+    {
+        while(g->tamanho > j)
+        {   
+            if(j == i){
+                j++;
+                continue;
+            }
+
+            ligacao2(td, g->nos[i]->nome_user, g->nos[j]->nome_user, msg);
+
+            if(msg[0]>0){
+                cria_ligacao(g->nos[i], g->nos[j], msg[0]);
+            }
+
+            if(msg[1]>0){
+                cria_ligacao(g->nos[j], g->nos[i], msg[1]);
+            }
+            j++;
+        }
+        j=0;
+        i++;
+    }
+
     return g;
 }
 
@@ -223,7 +272,64 @@ grafo * criaGrafo(tabela_dispersao *td)
 
 no_grafo **lista_amigos(grafo *g, char *nomeU, int *n)
 {
-   return NULL;
+    if(g == NULL){
+        return NULL;
+    }
+
+    if(nomeU == NULL){
+        return NULL;
+    }
+
+    if(n == NULL){
+        return NULL;
+    }
+
+    no_grafo ** amigos = (no_grafo**) malloc(sizeof(no_grafo));
+    no_grafo * amigo;
+    int i = 0, j = 0, amigo1 = 0;
+    *n = 0;
+
+    while (g->tamanho > i)
+    {
+        if(strcmp(g->nos[i]->nome_user, nomeU) == 0){
+            while(g->nos[i]->tamanho > j)
+            {
+                if(g->nos[i]->ligacoes[j]->peso_ligacao >= 4){
+                    amigo1 = 1;
+                    amigo = g->nos[i]->ligacoes[j]->destino;
+                }
+                j++;
+            }
+            
+            if(amigo1 == 1){
+                j = 0;
+                while(amigo->tamanho > j)
+                {
+                    if(strcmp(amigo->ligacoes[j]->destino->nome_user, nomeU) == 0){
+                        if(amigo->ligacoes[j]->peso_ligacao >= 4){
+                            if(*n > 0){
+                                amigos = (no_grafo **) realloc(amigos, sizeof(no_grafo)*(*n));
+                            }
+                            amigos[*n] = amigo;
+                            (*n)++;
+                        }
+                    }
+                    j++;
+                }
+            }
+
+            if((*n) > 0){
+                return amigos;
+            } else {
+                free(amigos);
+                return NULL;
+            }
+        }
+       i++;
+    }
+
+    free(amigos);
+    return NULL;
 }
 
 
@@ -232,6 +338,4 @@ no_grafo ** identifica_ciclo(grafo *g, char *nomeU, int M, int *n)
 {
     
     return NULL;
-
-  
 }

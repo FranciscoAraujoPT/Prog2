@@ -142,8 +142,8 @@ mensagem **tabela_listagem(tabela_dispersao *td, const char *remetente)
     if (remetente == NULL){
         return NULL;
     }
-   
-    mensagem **msg = (mensagem**) malloc(sizeof(mensagem) * (tabela_existe(td, remetente))); //Pensar em como melhorar...
+
+    mensagem **msg = (mensagem**) malloc(sizeof(mensagem) * (tabela_existe(td, remetente)) + sizeof(mensagem*)); //Pensar em como melhorar...
     
     if(msg == NULL){
         return NULL;
@@ -277,22 +277,18 @@ tabela_dispersao* tabela_carrega(char *ficheiro,int tamanho)
 void ligacao2(tabela_dispersao *td, char *nomeU1, char *nomeU2, int totMsg[2])
 {
     if(td == NULL){
-        printf("erro1\n");
         return;
     }
 
     if(nomeU1 == NULL){
-        printf("erro2\n");
         return;
     }
 
     if(nomeU2 == NULL){
-        printf("erro3\n");
         return;
     }
 
     if(totMsg == NULL){
-        printf("erro4\n");
         return;
     }
 
