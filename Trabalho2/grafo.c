@@ -7,20 +7,6 @@
 #include <string.h>
 #include "grafo.h"
 
-void imprime_grafo(no_grafo **g)
-{
-    if(g == NULL){
-        return;
-    }
-
-    int i = 0;
-
-    while(g)
-    {
-        printf("%d: %s\n", i, g[i]->nome_user);
-        i++;
-    }
-}
 
 grafo* grafo_novo()
 {
@@ -249,7 +235,6 @@ grafo * criaGrafo(tabela_dispersao *td)
                 j++;
                 continue;
             }
-
             ligacao2(td, g->nos[i]->nome_user, g->nos[j]->nome_user, msg);
 
             if(msg[0]>0){
@@ -264,7 +249,7 @@ grafo * criaGrafo(tabela_dispersao *td)
         j=0;
         i++;
     }
-
+    printf("\nFIM\n");
     return g;
 }
 
@@ -332,10 +317,82 @@ no_grafo **lista_amigos(grafo *g, char *nomeU, int *n)
     return NULL;
 }
 
+no_grafo * ajuda_identifica_ciclo(no_grafo **ciclo, int *n)
+{
+    // int i = 0;
+
+    // while(ciclo[*n]->tamanho > i)
+    // {
+    //     ciclo[*n+1] = ciclo[*n]->ligacoes[i]->destino;
+    //     printf("x: %s\t", ciclo[0]->nome_user);
+    //     if(ciclo[*n]->ligacoes[i]->destino == ciclo[0]){
+    //         printf("3:%s\t", ciclo[*n]->nome_user);
+    //         return ciclo[*n];
+    //     }
+        
+    //     i++;
+        
+    //     if(ciclo[*n]->tamanho = i-1){
+    //         (*n)++;
+    //         for(int j=0;j<ciclo[*n]->tamanho;j++)
+    //         {
+    //             ciclo[*n+1] = ciclo[*n]->ligacoes[j]->destino;
+    //             if(ajuda_identifica_ciclo(ciclo, n) != NULL){
+    //                 printf("2:%s\t", ciclo[*n]->nome_user);
+    //                 break;
+    //             }
+
+    //         }
+    //         (*n)--;
+    //         i = 0;
+    //     }
+    // }
+
+    return NULL;
+}
 
 
 no_grafo ** identifica_ciclo(grafo *g, char *nomeU, int M, int *n)
 {
+    if(g == NULL){
+        return NULL;
+    }
+
+    if(nomeU == NULL){
+        return NULL;
+    }
+
+    if(n == NULL){
+        return NULL;
+    }
+
+    if(M < 3){
+        return NULL;
+    }
+
+    // no_grafo ** ciclo = (no_grafo**) malloc(sizeof(no_grafo)*M);
+
+    // if (ciclo == NULL){
+    //     return NULL;
+    // }
     
+
+    // int i = 0;
+    // *n = 1;
+    // ciclo[0] = encontra_no(g, nomeU);
+    // printf("0:%s\t", ciclo[0]->nome_user);
+
+    // while(ciclo[0]->tamanho > i)
+    // {
+    //     ciclo[1] = ciclo[0]->ligacoes[i]->destino;
+    //     printf("1:%s\t", ciclo[1]->nome_user);
+
+    //     if(ajuda_identifica_ciclo(ciclo, n) != NULL){
+    //         break;
+    //     }
+
+    //     i++;
+    // }
+
     return NULL;
 }
