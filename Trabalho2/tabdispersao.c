@@ -142,8 +142,8 @@ mensagem **tabela_listagem(tabela_dispersao *td, const char *remetente)
     if (remetente == NULL){
         return NULL;
     }
-   
-    mensagem **msg = (mensagem**) malloc(sizeof(mensagem) * (tabela_existe(td, remetente))); //Pensar em como melhorar...
+
+    mensagem **msg = (mensagem**) malloc(sizeof(mensagem) * (tabela_existe(td, remetente)) + sizeof(mensagem*)); //Pensar em como melhorar...
     
     if(msg == NULL){
         return NULL;
@@ -277,49 +277,53 @@ tabela_dispersao* tabela_carrega(char *ficheiro,int tamanho)
 void ligacao2(tabela_dispersao *td, char *nomeU1, char *nomeU2, int totMsg[2])
 {
     if(td == NULL){
-        printf("erro1\n");
         return;
     }
 
     if(nomeU1 == NULL){
-        printf("erro2\n");
         return;
     }
 
     if(nomeU2 == NULL){
-        printf("erro3\n");
         return;
     }
 
     if(totMsg == NULL){
-        printf("erro4\n");
         return;
     }
 
     totMsg[0] = totMsg[1] = 0;
     int existeU1 = 0, existeU2 = 0;
-    elemento *elem;
 
-    for(int i=0;i<td->tamanho;i++)
-    {
-        elem = td->elementos[i];
-        while(elem)
-        {
-            if(strcmp(elem->msg->remetente, nomeU1) == 0){
-                existeU1 = 1;
-                if(strcmp(elem->msg->destinatario, nomeU2) == 0){
-                    totMsg[0]++;                
-                }
-            } else if (strcmp(elem->msg->remetente, nomeU2) == 0){
-                existeU2 = 1;
-                if(strcmp(elem->msg->destinatario, nomeU1) == 0){
-                    totMsg[1]++;
-                }
-            }
-            elem = elem->proximo;
-        }
-    }  
+    int indice = td->hfunc(nomeU1, td->tamanho);
+    elemento *elem = td->elementos[indice];
     
+
+    while(elem)
+    {
+        if(strcmp(elem->msg->remetente, nomeU1) == 0){
+            existeU1 = 1;
+            if(strcmp(elem->msg->destinatario, nomeU2) == 0){
+                totMsg[0]++;                
+            }
+        }
+        elem = elem->proximo;
+    }
+    
+    indice = td->hfunc(nomeU2, td->tamanho);
+    elem = td->elementos[indice];
+
+    while(elem)
+    {
+        if (strcmp(elem->msg->remetente, nomeU2) == 0){
+            existeU2 = 1;
+            if(strcmp(elem->msg->destinatario, nomeU1) == 0){
+                totMsg[1]++;
+            }
+        }
+        elem = elem->proximo;
+    } 
+
     if(existeU1 == 0){
         totMsg[0] = -1;
     }
