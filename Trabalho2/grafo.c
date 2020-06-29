@@ -113,14 +113,20 @@ no_grafo * no_insere(grafo *g, char *user)
     g->nos = (no_grafo**) realloc(g->nos, sizeof(no_grafo*)*(g->tamanho+1));
 
     if(g->nos == NULL){
-        g->nos = aux;
+        g->nos = aux; //Garante que a memoria do g->nos não é perdida mesmo que o realloc não tenha tido sucesso
         return NULL;
     }
     
-    g->nos[g->tamanho] = cria_no(user);
+    no_grafo* no = cria_no(user);
+
+    if(no == NULL){
+        return NULL;
+    }
+
+    g->nos[g->tamanho] = no;
     g->tamanho++;    
 
-    return g->nos[g->tamanho-1];
+    return no;
 }
 
 ligacao * cria_lig(no_grafo *destino,int peso)
@@ -166,13 +172,21 @@ int  cria_ligacao(no_grafo *origem, no_grafo *destino, int peso)
         }
     }
 
+    ligacao **aux = origem->ligacoes;
     origem->ligacoes = (ligacao**) realloc(origem->ligacoes, sizeof(ligacao*)*(origem->tamanho+1));
 
     if(origem->ligacoes == NULL){
+        origem->ligacoes = aux; ////Garante que a memoria do origem->ligacoes não é perdida mesmo que o realloc não tenha tido sucesso
         return -1;
     }
     
-    origem->ligacoes[origem->tamanho] = cria_lig(destino, peso);
+    ligacao *lig = cria_lig(destino, peso);
+
+    if(lig == NULL){
+        return -1;
+    }
+
+    origem->ligacoes[origem->tamanho] = lig;
     origem->tamanho++;
 
     return 0;
@@ -220,7 +234,7 @@ grafo * criaGrafo(tabela_dispersao *td)
 
     for(i=0;i<td->tamanho;i++){
         elem = td->elementos[i];
-        while(elem)
+        while(elem != NULL)
         {   
             no_insere(g, elem->msg->remetente);
             no_insere(g, elem->msg->destinatario);
