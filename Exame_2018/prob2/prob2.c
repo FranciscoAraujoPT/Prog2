@@ -12,14 +12,63 @@
 int filtra_strings(no_avl *no, int min)
 {
 	
-	return 0;
+	if(no == NULL){
+        return 0;
+	}
+
+	if(min < 0){
+		return 0;
+	}
+	
+	int n=0;
+
+	n += filtra_strings(no->esquerda, min);
+	if(strlen(no->str) > min){
+		printf("%s\n", no->str);
+		n++;
+	}
+    n += filtra_strings(no->direita, min);
+
+	return n;
 }
 
 /*** problema 2.2 ***/
 int* caminho_pontos(grafo *g, int *pontos, int n, int *tam_caminho)
 {
-	
-	return NULL;
+	if(g == NULL){
+		return NULL;
+	}
+
+	if(pontos == NULL){
+		return NULL;
+	}
+
+	if(tam_caminho == NULL){
+		return NULL;
+	}
+
+	if(n <= 1){
+		return NULL;
+	}
+
+	int *aux, k = 0;
+	int *caminho_total = (int*)malloc(sizeof(int)*g->tamanho);
+
+	for(int i=1;i<n;i++)
+	{
+		aux = grafo_bfs(g,pontos[i-1], pontos[i], tam_caminho);
+		for(int j=0;j<(*tam_caminho);j++)
+		{
+			caminho_total[k]=aux[j];
+			k++;
+		}
+		k--;
+		free(aux);
+	}
+
+	*tam_caminho = k+1;
+
+	return caminho_total;
 }
 
 /****************************************************/
