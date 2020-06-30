@@ -13,14 +13,70 @@
 vetor* encontra_nomes(vetor *vec1, vetor *vec2)
 {
 	/* complexidade do algoritmo: ______________ */
+	if(vec1 == NULL){
+		return NULL;
+	}
 
-	return NULL;
+	if(vec2 == NULL){
+		return NULL;
+	}
+
+	vetor * nomes = vetor_novo();
+
+	if(nomes == NULL){
+		return NULL;
+	}
+
+	char* aux1, *aux2;
+
+	for(int i=0;i<vec1->tamanho;i++)
+	{
+		aux1 = vetor_elemento(vec1, i);
+		for(int j=0;j<vec2->tamanho;j++)
+		{
+			aux2 = vetor_elemento(vec2, j);
+			if(strcmp(aux1, aux2) == 0){
+				if(vetor_insere(nomes, aux1,-1) == -1){
+					return NULL;
+				}		
+			}
+		}
+	}
+	
+	return nomes;
 }
 
 /*** problema 2.2 ***/
 fila* filtra_nomes(lista *lst, char *existe)
 {
-	return NULL;
+	if(lst == NULL){
+		return NULL;
+	}
+
+	if(existe == NULL){
+		return NULL;
+	}
+
+	fila *f = fila_nova();
+
+	if(f == NULL){
+		return NULL;
+	}
+
+	l_elemento* elem = lst->inicio;
+	for(int i=0;i<lst->tamanho;i++)
+	{
+		if(strncmp(elem->str, existe, strlen(existe)) == 0){
+			if(fila_push(f, elem->str) == -1){
+				fila_apaga(f);
+				return NULL;
+			}
+			lista_remove(lst, elem);
+		}
+		elem = elem->proximo;
+	}
+
+	return f;
 }
 
 /****************************************************/
