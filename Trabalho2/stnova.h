@@ -9,11 +9,20 @@
 
 /* podem criar mais struct que achem necessárias*/
 
-
+typedef struct {
+	int prioridade;
+	mensagem *msg;
+} h_elemento;
 
 typedef struct
 {
- 		
+ 	/* numero de elementos no vetor */
+	int tamanho;
+	/* tamanho maximo do vetor */
+	int capacidade;
+	/* vetor de apontadores para elementos */
+	h_elemento ** h_elementos;
+
 } estrutura;
 
 
@@ -31,7 +40,7 @@ estrutura* st_nova();
  * parametro elem - elemento que se pretende inserir na estrutura
  * Retorna 0 se bem-sucedida ou -1 em contrário.
  * */
-int st_insere(estrutura *st, elemento *elem);
+int st_insere(estrutura *st, elemento *elem, int msg[2]);
 
 
 /*
