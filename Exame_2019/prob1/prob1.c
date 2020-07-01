@@ -11,12 +11,38 @@ char* get_freguesia(char* rua);
 //1.1
 // Adiciona a casa comercial de nome designacao e atividade comercial atividade na tabela comercio_zona.
 // Se a casa comercial a inserir possui atividade ainda nao presente na zona (nao existe em atividades_zona),
-// esta atividade ee inserida na tabela atividades_zona e a classe da casa comercial ee “top”.
-// Caso contrario, a classe ee “normal”.
+// esta atividade ee inserida na tabela atividades_zona e a classe da casa comercial ee ï¿½topï¿½.
+// Caso contrario, a classe ee ï¿½normalï¿½.
 // A funcao retorna 0 se a casa comercial ja existe ou 1 se nao.
 int adiciona_comercio(char* designacao, char* atividade, tabela_dispersao* comercio_zona,
 		                                              tabela_dispersao* atividades_zona)
 {
+	if(comercio_zona == NULL){
+		return 0;
+	}
+
+	if(atividades_zona == NULL){
+		return 0;
+	}
+
+	if(designacao == NULL){
+		return 0;
+	}
+
+	if(atividade == NULL){
+		return 0;
+	}
+
+	if(tabela_existe(comercio_zona, designacao) == TABDISPERSAO_NAOEXISTE){
+		tabela_insere(comercio_zona, designacao,"top");
+		tabela_insere(atividades_zona, atividade, atividade);
+		return 1;
+	}
+
+	int indice = comercio_zona->hfunc(designacao, comercio_zona->tamanho);
+
+	strcpy(comercio_zona->elementos[indice]->obj->valor,"normal");
+	
 	return 0;
 }
 
@@ -28,6 +54,37 @@ int adiciona_comercio(char* designacao, char* atividade, tabela_dispersao* comer
 // retorna NULL em caso de erro
 char *remove_rua_menos_comercio(heap *ruas, char *freg)
 {
+	if(ruas == NULL){
+		return NULL;
+	}
+
+	if(freg == NULL){
+		return NULL;
+	}
+
+	heap * aux = heap_nova(ruas->tamanho);
+	char * aux2;
+
+	while(ruas->tamanho>0){ //Total: O(n log n) + 2*O(log n) -> O(n log n)
+		if(strcmp(get_freguesia(ruas->elementos[1]->valor), freg) == 0){
+			aux2 = ruas->elementos[1]->valor;
+			while(aux->tamanho>0){// 2*O(log n) * O(n) -> O(n log n)
+				heap_insere(ruas, aux->elementos[1]->valor, aux->elementos[1]->prioridade); // O(log n);
+				free(heap_remove(aux)); // O(log n);
+			}
+			heap_apaga(aux);
+			return aux2;
+		}
+		heap_insere(aux, ruas->elementos[1]->valor, ruas->elementos[1]->prioridade); // O(log n);
+		free(heap_remove(ruas));// O(log n);
+	}
+
+	while(aux->tamanho>0){// 2*O(log n) * O(n) -> O(n log n))
+		heap_insere(ruas, aux->elementos[1]->valor, aux->elementos[1]->prioridade); // O(log n);
+		free(heap_remove(aux));// O(log n);
+	}
+
+	heap_apaga(aux);
 	return NULL;
 }
 
@@ -37,7 +94,7 @@ char *remove_rua_menos_comercio(heap *ruas, char *freg)
 //1.3
 /*Comentar a complexidade da funcao 1.2
 
-
+	O(n log n) (justificado em cima)
 */
 
 
