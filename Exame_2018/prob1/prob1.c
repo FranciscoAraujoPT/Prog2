@@ -8,16 +8,54 @@
 /*** problema 1.1 ***/
 void vetor_inverte(vetor *v)
 {
-	/* complexidade do algoritmo: _______ */
-	
+	/* complexidade do algoritmo: O(n) */
+
+	if(v == NULL){
+		return;
+	}
+
+	if(v->tamanho <= 1){
+		return;
+	}
+
+	for(int i=0; i<v->tamanho; i++)
+	{
+		vetor_insere(v, v->elementos[v->tamanho-1].str, i);
+		vetor_remove(v, v->tamanho-1);
+	}
 
 }
 
 /*** problema 1.2 ***/
 fila* subfila_maior(fila *f, int limiar)
 {
+	if(f == NULL){
+		return NULL;
+	}
+
+	if(limiar < 0){
+		return NULL;
+	}
+
+	fila *maior = fila_nova();
+
+	if(maior == NULL){
+		return NULL;
+	}
+
+	filaItem * aux = f->cabeca;
+
+	while(aux != f->cauda)
+	{
+		if(strlen(aux->string) > limiar){
+			fila_push(maior, aux->string);
+		}
+
+		aux = aux->proximo;
+	}
+
+	return maior;
 	
-	return NULL;
 }
 
 /****************************************************/
