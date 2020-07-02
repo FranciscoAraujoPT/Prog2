@@ -8,48 +8,33 @@
 #include <string.h>
 #include "stnova.h"
 
-#define RAIZ 		(1)
-#define PAI(x) 		(x/2)
-#define FILHO_ESQ(x) 	(x*2)
-#define FILHO_DIR(x) 	(x*2+1)
+void print_list(estrutura *lst){
 
-void heap_imprime(estrutura *h, int indice)
-{
-  int i, nivel = 0;
-  
-  if (indice < h->tamanho)
-  {
-    i = indice;
-    while(i > 1)
-    {
-      i = i/2;
-      nivel++;
+    if(lst == NULL){
+            printf("Linked list is empty\n");
     }
-    
-    heap_imprime(h, indice*2);
-    
-    for(i = 0; i < 3 * nivel; i++)
-      printf("     ");
-    
-    printf("%s (%d)\n",h->h_elementos[indice]->msg->remetente, h->h_elementos[indice]->prioridade);
-    
-    heap_imprime(h, indice*2+1);
-  }
+    estrutura *aux = lst;
+    for(int i=0;i<lst->tamanho;i++){
+        printf("%s %d\n", aux->inicio->msg->remetente, aux->inicio->prioridade);
+        aux->inicio = aux->inicio->proximo;
+    }
 }
+
+void elemento_apaga(l_elemento *elem);
 
 estrutura* st_nova()
 {
-    estrutura * h = (estrutura *) malloc(sizeof(estrutura));
+    estrutura * lst = (estrutura *) malloc(sizeof(estrutura));
 
-	if(h == NULL){
+	if(lst == NULL){
 		return NULL;
     }
 
-	h->tamanho = 0;
-	h->capacidade = 0;
-	h->h_elementos = NULL;
+	lst->tamanho = 0;
+    lst->inicio = NULL;
+    lst->fim = NULL;
 
-	return h;
+	return lst;
 }
 
 
@@ -59,7 +44,7 @@ mensagem * cria_mensagem(elemento *elem)
         return NULL;
     }
 
-    char *text = (char*) malloc(sizeof(char)*strlen(elem->msg->texto)+1);
+    char *text = (char*) malloc(sizeof(char)*(strlen(elem->msg->texto)+1));
 
     if(text == NULL){
         return NULL;
@@ -80,15 +65,28 @@ mensagem * cria_mensagem(elemento *elem)
     return m;
 }
 
-int maior_que(h_elemento * e1, h_elemento * e2)
+l_elemento* novo_elemento(mensagem* m, int msg[2])
 {
-	if (e1 == NULL || e2 == NULL)
+	l_elemento *item = (l_elemento *) malloc(sizeof(l_elemento));
+	
+    if(item == NULL){
+		return NULL;
+    }
+
+    item->msg = m;
+	if(item->msg == NULL)
 	{
-		return 0;
+		free(item);
+		return NULL;
 	}
 
-	return e1->prioridade < e2->prioridade;
+    item->prioridade = msg[0] + msg[1];
+    item->proximo = NULL;
+    item->anterior = NULL;
+
+	return item;
 }
+
 
 int st_insere(estrutura *st, elemento *elem, int msg[2])
 {
@@ -107,43 +105,40 @@ int st_insere(estrutura *st, elemento *elem, int msg[2])
         return -1;
     }
 
-    h_elemento * aux;
-	int i;
+    l_elemento * curr = novo_elemento(m, msg);
+    l_elemento * pos = st->inicio;
 
-	/* se heap está cheia, realoca o espaço */
-	if (st->tamanho >= st->capacidade){
-        h_elemento ** aux = st->h_elementos;
-        st->capacidade = st->tamanho+1;
-		st->h_elementos = (h_elemento**) realloc(st->h_elementos, sizeof(h_elemento*)*(st->capacidade));
-        
-        if(st->h_elementos == NULL){
-            st->h_elementos = aux;
-            free(m);
-            return -1;
-        }
-    }
-
-    st->h_elementos[st->tamanho] = (h_elemento*) malloc(sizeof(h_elemento));
-
-    if(st->h_elementos[st->tamanho] == NULL){// lembrar de modificar
+    if(curr == NULL){
         return -1;
     }
 
-	st->h_elementos[st->tamanho]->msg = m;
-    st->h_elementos[st->tamanho]->prioridade = -(msg[0]+msg[1]);
-    i = st->tamanho++;
-
- 	/* enquanto elemento for mais prioritario do que o respetivo pai, troca-os */
-	while ((st->tamanho != RAIZ) && (maior_que(st->h_elementos[i], st->h_elementos[PAI(i)])))
-	{
-		aux = st->h_elementos[PAI(i)];
-		st->h_elementos[PAI(i)] = st->h_elementos[i];
-		st->h_elementos[i] = aux;
-		i = PAI(i);
-	}
+    if(st->tamanho == 0){
+        st->inicio = st->fim = curr;
+    } else {
+        if (curr->prioridade <= st->fim->prioridade){
+            curr->anterior = st->fim;
+		    st->fim->proximo = curr;
+		    st->fim = curr;
+        } else {
+            if (curr->prioridade > st->inicio->prioridade){
+                curr->proximo = st->inicio;
+                st->inicio->anterior = curr;
+                st->inicio = curr;
+            } else {
+                while(curr->prioridade <= pos->prioridade)
+                {
+                    pos = pos->proximo;
+                }
+                curr->anterior = pos->anterior;
+                curr->proximo = pos;
+                pos->anterior->proximo = curr;
+                pos->anterior = curr;
+            }
+        }
+    }
+    st->tamanho++;
 
     return 0;
-
 }
 
 
@@ -173,77 +168,107 @@ int st_importa_tabela(estrutura *st, tabela_dispersao *td)
         }
     }
 
-    heap_imprime(st, 1);
+    //print_list(st);
     return 0;
 
 }
 
 elemento *st_remove(estrutura *st,char *remetente)
 {
-    int i, filho_maior;
-	h_elemento * aux;
+    if(remetente == NULL){
+        return NULL;
+    }
 
-    elemento *ret = (elemento*) malloc(sizeof(elemento));
+    if(st == NULL){
+        return NULL;
+    }
 
-	/* se heap estiver vazia, nao remove elemento */
-	if (st == NULL || st->tamanho <= 0){
+	/* se a lista estiver vazia, nao remove elemento */
+	if (st->tamanho <= 0){
 		return NULL;
     }
 
-	ret->msg = st->h_elementos[RAIZ]->msg;
-    ret->proximo = NULL;
-	free(st->h_elementos[RAIZ]);
+    int prioridade = 0, i = 0;
+    elemento *aux = NULL;
+    l_elemento *elem = st->inicio;
 
-	/* coloca ultimo elemento da heap na raiz */
-	st->h_elementos[RAIZ] = st->h_elementos[st->tamanho-1];
-	st->h_elementos[st->tamanho-1] = NULL;
-	st->tamanho--;
+    while(elem != NULL)
+    {
+        if(strcmp(elem->msg->remetente, remetente) == 0){
+            
+            if(prioridade <= elem->prioridade){
+                prioridade = elem->prioridade;
+                printf("%s\n", elem->msg->remetente);
+                char *text = (char*) malloc(sizeof(char)*(strlen(elem->msg->texto)+1));
 
- 	i = RAIZ;
+                if(text == NULL){
+                    return NULL;
+                }
 
-	/* enquanto nao chegar 'a base da heap */
-	while(FILHO_ESQ(i) <= st->tamanho)
-	{
-		filho_maior = FILHO_ESQ(i);
+                mensagem *m = (mensagem*) malloc(sizeof(mensagem));
 
-		/* verifica se existe filho 'a direita e se este e' mais prioritario do que 'a esquerda */
-		if (FILHO_DIR(i) <= st->tamanho && maior_que(st->h_elementos[FILHO_DIR(i)], st->h_elementos[FILHO_ESQ(i)]))
-			filho_maior = FILHO_DIR(i);
+                if(m == NULL){
+                    free(text);
+                    return NULL;
+                }
+                
+                aux = (elemento*) realloc(aux, sizeof(elemento)*(i+1));
+                aux[i].msg = m;
+                aux[i].msg->texto = text;
+                strcpy(aux[i].msg->destinatario, elem->msg->destinatario);
+                strcpy(aux[i].msg->remetente, elem->msg->remetente);
+                strcpy(aux[i].msg->texto, elem->msg->texto);
+                
+                if(i != 0) {
+                    aux[i-1].proximo = &aux[i];
+                }
+                st->tamanho--;
+                i++;
+            }
+        }
+        elem = elem->proximo;
+    }
 
-		/* enquanto elemento for mais prioritario do que o respetivo pai, troca-os */
-		if (maior_que(st->h_elementos[filho_maior], st->h_elementos[i]))
-		{
-			aux = st->h_elementos[filho_maior];
-			st->h_elementos[filho_maior] = st->h_elementos[i];
-			st->h_elementos[i] = aux;
-			i = filho_maior;
-		}
-		else
-			break;
-	}
+    aux[i].proximo = NULL;
 
-    printf("%s\t%s\n", ret->msg->remetente, ret->msg->destinatario);
-	return ret; 
+    printf("\ni=%d\n", i);
+    for(int j=0;j<i;j++)
+    {  
+        printf("%d: %s\t%s\n",j, aux[j].msg->remetente, aux[j].msg->destinatario);
+    }
+
+    return aux; 
 }
 
+ 
+void elemento_apaga(l_elemento *elem)
+{
+    if(elem == NULL){
+        return;
+    }
+
+    free(elem->msg->texto);
+    elem->msg->texto = NULL;
+    free(elem->msg);
+    elem->msg = NULL;
+    free(elem);
+}
 
 int st_apaga(estrutura *st)
 {
-    int i;
 
 	if(st == NULL){
 		return -1;
     }
 
-	for(i=RAIZ; i<st->tamanho; i++)
+    l_elemento *aux = st->inicio;
+	
+    while(aux != NULL)
 	{
-        free(st->h_elementos[i]->msg->texto);
-		free(st->h_elementos[i]->msg);
-		free(st->h_elementos[i]);
-		st->h_elementos[i]=NULL;
+        elemento_apaga(aux);
+        aux = aux->proximo;
 	}
 
-	free(st->h_elementos);
 	free(st);
     
     return 0;

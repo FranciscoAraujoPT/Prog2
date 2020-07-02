@@ -9,19 +9,20 @@
 
 /* podem criar mais struct que achem necessárias*/
 
-typedef struct {
+typedef struct _l_elemento
+{
 	int prioridade;
 	mensagem *msg;
-} h_elemento;
+	struct _l_elemento *proximo;
+	struct _l_elemento *anterior;
+
+} l_elemento;
 
 typedef struct
 {
- 	/* numero de elementos no vetor */
+ 	l_elemento *inicio;
+	l_elemento *fim;
 	int tamanho;
-	/* tamanho maximo do vetor */
-	int capacidade;
-	/* vetor de apontadores para elementos */
-	h_elemento ** h_elementos;
 
 } estrutura;
 
