@@ -11,6 +11,7 @@
 
 typedef struct _l_elemento
 {
+	;
 	int prioridade;
 	mensagem *msg;
 	struct _l_elemento *proximo;
@@ -20,6 +21,7 @@ typedef struct _l_elemento
 
 typedef struct
 {
+	l_elemento *curr;
  	l_elemento *inicio;
 	l_elemento *fim;
 	int tamanho;
@@ -41,7 +43,7 @@ estrutura* st_nova();
  * parametro elem - elemento que se pretende inserir na estrutura
  * Retorna 0 se bem-sucedida ou -1 em contrário.
  * */
-int st_insere(estrutura *st, elemento *elem, int msg[2]);
+int st_insere(estrutura *st, elemento *elem);
 
 
 /*

@@ -8,19 +8,10 @@
 #include <string.h>
 #include "stnova.h"
 
-void print_list(estrutura *lst){
 
-    if(lst == NULL){
-            printf("Linked list is empty\n");
-    }
-    estrutura *aux = lst;
-    for(int i=0;i<lst->tamanho;i++){
-        printf("%s %d\n", aux->inicio->msg->remetente, aux->inicio->prioridade);
-        aux->inicio = aux->inicio->proximo;
-    }
-}
-
-void elemento_apaga(l_elemento *elem);
+mensagem * cria_mensagem(elemento *elem);
+int novo_elemento(estrutura *st, elemento *elem, tabela_dispersao *td);
+void elemento_apaga(estrutura *st, l_elemento *elem);
 
 estrutura* st_nova()
 {
@@ -36,7 +27,6 @@ estrutura* st_nova()
 
 	return lst;
 }
-
 
 mensagem * cria_mensagem(elemento *elem)
 {
@@ -65,30 +55,52 @@ mensagem * cria_mensagem(elemento *elem)
     return m;
 }
 
-l_elemento* novo_elemento(mensagem* m, int msg[2])
+int novo_elemento(estrutura *st, elemento *elem, tabela_dispersao *td)
 {
+    if(st == NULL){
+        return -1;
+    }
+
+    if(elem == NULL){
+        return -1;
+    }
+
+    if(td == NULL){
+        return -1;
+    }
+
 	l_elemento *item = (l_elemento *) malloc(sizeof(l_elemento));
 	
     if(item == NULL){
-		return NULL;
+		return -1;
     }
 
-    item->msg = m;
+    item->msg = cria_mensagem(elem);
+
 	if(item->msg == NULL)
 	{
 		free(item);
-		return NULL;
+		return -1;
 	}
+
+    int msg[2];
+    ligacao2(td, item->msg->remetente, item->msg->destinatario, msg);
 
     item->prioridade = msg[0] + msg[1];
     item->proximo = NULL;
     item->anterior = NULL;
 
-	return item;
+    st->curr = item;
+
+    if(st_insere(st,elem) == -1){
+        elemento_apaga(st, item);
+        return-1;
+    }
+
+	return 0;
 }
 
-
-int st_insere(estrutura *st, elemento *elem, int msg[2])
+int st_insere(estrutura *st, elemento *elem)
 {
     
 	if(st == NULL){
@@ -99,18 +111,8 @@ int st_insere(estrutura *st, elemento *elem, int msg[2])
         return -1;
     }
 
-    mensagem *m = cria_mensagem(elem);
-
-    if(m == NULL){
-        return -1;
-    }
-
-    l_elemento * curr = novo_elemento(m, msg);
-    l_elemento * pos = st->inicio;
-
-    if(curr == NULL){
-        return -1;
-    }
+    l_elemento * pos = st->inicio, *curr = st->curr;
+    
 
     if(st->tamanho == 0){
         st->inicio = st->fim = curr;
@@ -141,7 +143,6 @@ int st_insere(estrutura *st, elemento *elem, int msg[2])
     return 0;
 }
 
-
 int st_importa_tabela(estrutura *st, tabela_dispersao *td)
 {
 
@@ -154,23 +155,19 @@ int st_importa_tabela(estrutura *st, tabela_dispersao *td)
     }
 
     elemento *elem;
-    int msg[2];
 
     for(int i=0;i<td->tamanho;i++){
         elem = td->elementos[i];
         while(elem != NULL)
         {   
-            ligacao2(td, elem->msg->remetente, elem->msg->destinatario, msg);
-            if(st_insere(st, elem, msg) == -1){
+            if(novo_elemento(st, elem, td) == -1){
                 return -1;
             }
             elem = elem->proximo;
         }
     }
 
-    //print_list(st);
     return 0;
-
 }
 
 elemento *st_remove(estrutura *st,char *remetente)
@@ -188,17 +185,17 @@ elemento *st_remove(estrutura *st,char *remetente)
 		return NULL;
     }
 
-    int prioridade = 0, i = 0;
-    elemento *aux = NULL;
-    l_elemento *elem = st->inicio;
+    int prioridade = -1, i = 0;
+    elemento *inicio = NULL, *aux = NULL, *aux2;
+    l_elemento *elem = st->inicio, *aux3;
 
     while(elem != NULL)
     {
         if(strcmp(elem->msg->remetente, remetente) == 0){
-            
+            if(prioridade > elem->prioridade){
+                break;
+            }
             if(prioridade <= elem->prioridade){
-                prioridade = elem->prioridade;
-                printf("%s\n", elem->msg->remetente);
                 char *text = (char*) malloc(sizeof(char)*(strlen(elem->msg->texto)+1));
 
                 if(text == NULL){
@@ -211,40 +208,62 @@ elemento *st_remove(estrutura *st,char *remetente)
                     free(text);
                     return NULL;
                 }
+
+                aux = (elemento*) malloc(sizeof(elemento)*(i+1));
+                aux->msg = m;
+                aux->msg->texto = text;
                 
-                aux = (elemento*) realloc(aux, sizeof(elemento)*(i+1));
-                aux[i].msg = m;
-                aux[i].msg->texto = text;
-                strcpy(aux[i].msg->destinatario, elem->msg->destinatario);
-                strcpy(aux[i].msg->remetente, elem->msg->remetente);
-                strcpy(aux[i].msg->texto, elem->msg->texto);
+                strcpy(aux->msg->destinatario, elem->msg->destinatario);
+                strcpy(aux->msg->remetente, elem->msg->remetente);
+                strcpy(aux->msg->texto, elem->msg->texto);
                 
-                if(i != 0) {
-                    aux[i-1].proximo = &aux[i];
+                if(i == 0){
+                    prioridade = elem->prioridade;
+                    inicio = aux;
+                } else {
+                    aux2->proximo = aux;
                 }
-                st->tamanho--;
+                
+                aux2 = aux;
+                aux = aux->proximo;
                 i++;
+
+                aux3 = elem->proximo;
+                elemento_apaga(st, elem);
+                elem = aux3;
             }
+        } else {
+            elem = elem->proximo;
         }
-        elem = elem->proximo;
     }
 
-    aux[i].proximo = NULL;
+    aux2->proximo= NULL;
 
-    printf("\ni=%d\n", i);
-    for(int j=0;j<i;j++)
-    {  
-        printf("%d: %s\t%s\n",j, aux[j].msg->remetente, aux[j].msg->destinatario);
-    }
-
-    return aux; 
+    return inicio; 
 }
-
  
-void elemento_apaga(l_elemento *elem)
+void elemento_apaga(estrutura *st, l_elemento *elem)
 {
+    if(st == NULL){
+        return;
+    }
+
     if(elem == NULL){
         return;
+    }
+
+    st->tamanho--;
+
+    if(elem->anterior != NULL){
+		elem->anterior->proximo = elem->proximo;
+    } else {
+		st->inicio = elem->proximo;
+    }
+
+    if(elem->proximo != NULL){
+		elem->proximo->anterior = elem->anterior;
+    } else {
+		st->fim = elem->anterior;
     }
 
     free(elem->msg->texto);
@@ -261,17 +280,20 @@ int st_apaga(estrutura *st)
 		return -1;
     }
 
-    l_elemento *aux = st->inicio;
+    if(st->tamanho <= 0){
+		return -1;
+    }
+
+    l_elemento *aux;
 	
-    while(aux != NULL)
+    while(st->inicio)
 	{
-        elemento_apaga(aux);
-        aux = aux->proximo;
+		aux = st->inicio;
+		st->inicio = st->inicio->proximo;
+		elemento_apaga(st, aux);
 	}
 
 	free(st);
     
     return 0;
 }
-
-
