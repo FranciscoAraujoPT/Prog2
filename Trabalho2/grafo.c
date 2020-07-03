@@ -332,23 +332,46 @@ no_grafo **lista_amigos(grafo *g, char *nomeU, int *n)
     return NULL;
 }
 
-int ajuda_identifica_ciclo(grafo *g, no_grafo** ciclo, int visitados[], int M, int vert, int pre)
+no_grafo ** ajuda_identifica_ciclo(no_grafo **ciclo, int *n, int M)
 {
-
-    int ciclo_encontrado = 0;
-    visitados[vert] = 1;
-
-    for(int i=0;i<M || !ciclo_encontrado;i++)
-    {
-        
+    
+    if(*n != 1){
+        for(int j=0;j<ciclo[*n]->tamanho;j++){
+            if(ciclo[*n]->ligacoes[j]->destino == ciclo[0]){
+                (*n)++;
+                printf("3: %s\n", ciclo[j]->nome_user);
+                return ciclo;
+            }
+        }
     }
 
-    return ciclo_encontrado;
+    int i = 0;
+    while(*n < M)
+    {
+        if(ciclo[*n]->ligacoes[i] != NULL){
+            ciclo[*n+1] = ciclo[*n]->ligacoes[i]->destino;
+            printf("%d: %s\n",i, ciclo[i]->nome_user);
+            i++;
+            (*n)++;
+            if(ajuda_identifica_ciclo(ciclo, n, M) != NULL){
+                printf("olaa\n");
+                return ciclo;
+            }
+            (*n)--;
+        } else {
+            return NULL;
+        }
+    }
+
+    return NULL;
 }
+
 
 
 no_grafo ** identifica_ciclo(grafo *g, char *nomeU, int M, int *n)
 {
+
+
     if(g == NULL){
         return NULL;
     }
@@ -364,23 +387,28 @@ no_grafo ** identifica_ciclo(grafo *g, char *nomeU, int M, int *n)
     if(M < 3){
         return NULL;
     }
-
-    // no_grafo ** ciclo = (no_grafo**) malloc(sizeof(no_grafo*)*M);
-
-    // if (ciclo == NULL){
-    //     return NULL;
-    // }
     
-    // ciclo[0] = encontra_no(g, nomeU); //verificar se não é NULL
-    // int *visitados = calloc(M, sizeof(int));
-    // int i = 0, curr = 1, ciclo_encontrado = 0;
-    // *n = 1;
-    // printf("0:%s\t", ciclo[0]->nome_user);
+    no_grafo ** ciclo = (no_grafo**) malloc(sizeof(no_grafo)*M);
 
-    // visitados[0] = 1;
+    if (ciclo == NULL){
+        return NULL;
+    }
+    
+    int i = 0;
+    *n = 1;
+    ciclo[0] = encontra_no(g, nomeU);
 
-    // ciclo_encontrado  = cyclic_recursive(g, ciclo, visitados, M, 0, 0);
-    // free(visitados);
+    while(ciclo[0]->tamanho > i)
+    {
+        ciclo[1] = ciclo[0]->ligacoes[i]->destino;
+        
+        if(ajuda_identifica_ciclo(ciclo, n, M) != NULL){
+            printf("%d\n",*n);
+            return ciclo;
+        }
+
+        i++;
+    }
 
     return NULL;
 }
