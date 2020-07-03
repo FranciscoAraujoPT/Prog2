@@ -113,24 +113,19 @@ int tabela_existe(tabela_dispersao *td, const char *remetente)
         return -1;
     }
 
-    int nMsg = 0;
+    int nMsg = 0, indice = td->hfunc(remetente, td->tamanho);
     elemento *elem;
 
-    for(int i=0;i<td->tamanho;i++)
+    elem = td->elementos[indice];
+    while(elem != NULL)
     {
-        elem = td->elementos[i];
-        while(elem)
-        {
-            if(strcmp(elem->msg->remetente, remetente) == 0){
-                nMsg++;
-            }
-            elem = elem->proximo;
+        if(strcmp(elem->msg->remetente, remetente) == 0){
+            nMsg++;
         }
-    }  
+        elem = elem->proximo;
+    }
     
     return nMsg;
-
-  
 }
 
 mensagem **tabela_listagem(tabela_dispersao *td, const char *remetente)
@@ -149,20 +144,17 @@ mensagem **tabela_listagem(tabela_dispersao *td, const char *remetente)
         return NULL;
     }
      
-    int i, j=0;
+    int j=0, indice = td->hfunc(remetente, td->tamanho);
     elemento *elem;
 
-    for(i=0;i<td->tamanho;i++)
+    elem = td->elementos[indice];
+    while(elem != NULL)
     {
-        elem = td->elementos[i];
-        while(elem)
-        {
-            if(strcmp(elem->msg->remetente, remetente) == 0){
-                msg[j] = elem->msg;
-                j++;
-            }
-            elem = elem->proximo;
+        if(strcmp(elem->msg->remetente, remetente) == 0){
+            msg[j] = elem->msg;
+            j++;
         }
+        elem = elem->proximo;
     }
 
     msg[j] = NULL; //garante que a primeira, em caso de inexistência de remetente, ou a ultima posição é NULL.
@@ -299,7 +291,7 @@ void ligacao2(tabela_dispersao *td, char *nomeU1, char *nomeU2, int totMsg[2])
     elemento *elem = td->elementos[indice];
     
 
-    while(elem)
+    while(elem != NULL)
     {
         if(strcmp(elem->msg->remetente, nomeU1) == 0){
             existeU1 = 1;
@@ -313,7 +305,7 @@ void ligacao2(tabela_dispersao *td, char *nomeU1, char *nomeU2, int totMsg[2])
     indice = td->hfunc(nomeU2, td->tamanho);
     elem = td->elementos[indice];
 
-    while(elem)
+    while(elem != NULL)
     {
         if (strcmp(elem->msg->remetente, nomeU2) == 0){
             existeU2 = 1;
