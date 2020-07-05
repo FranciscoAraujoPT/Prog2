@@ -6,10 +6,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include "stnova.h"
 
 
 mensagem * cria_mensagem(elemento *elem);
+mensagem * cria_mensagem2 (l_elemento *elem);
+l_elemento* lista_primeiro_elemento(estrutura *st, char* nomeU1);
 int novo_elemento(estrutura *st, elemento *elem, tabela_dispersao *td);
 void elemento_apaga(estrutura *st, l_elemento *elem);
 
@@ -170,8 +173,61 @@ int st_importa_tabela(estrutura *st, tabela_dispersao *td)
     return 0;
 }
 
+mensagem * cria_mensagem2 (l_elemento *elem)
+{
+    if(elem == NULL){
+        return NULL;
+    }
+
+    char *text = (char*) malloc(sizeof(char)*(strlen(elem->msg->texto)+1));
+
+    if(text == NULL){
+        return NULL;
+    }
+
+    mensagem *m = (mensagem*) malloc(sizeof(mensagem));
+
+    if(m == NULL){
+        free(text);
+        return NULL;
+    }
+    
+    strcpy(m->destinatario, elem->msg->destinatario);
+    strcpy(m->remetente, elem->msg->remetente);
+    strcpy(text, elem->msg->texto);
+    m->texto = text;
+
+    return m;
+}
+
+l_elemento* lista_primeiro_elemento(estrutura *st, char* nomeU1)
+{
+	if (st == NULL){
+		return NULL;
+    }
+
+    if (nomeU1 == NULL){
+		return NULL;
+    }
+
+	l_elemento *curr = st->inicio;
+
+	while(curr != NULL)
+    {   
+        if(strcmp(curr->msg->remetente, nomeU1) == 0){
+            return curr;
+        }
+		curr = curr->proximo;
+    }
+
+	return NULL;
+}
+
 elemento *st_remove(estrutura *st,char *remetente)
 {
+    clock_t start_t, end_t;
+    start_t = clock(); 
+
     if(remetente == NULL){
         return NULL;
     }
@@ -187,58 +243,53 @@ elemento *st_remove(estrutura *st,char *remetente)
 
     int prioridade = -1, i = 0;
     elemento *inicio = NULL, *aux = NULL, *aux2;
-    l_elemento *elem = st->inicio, *aux3;
+    l_elemento *elem, *aux3;
 
-    while(elem != NULL)
+    elem = lista_primeiro_elemento(st, remetente);
+    
+    if(elem == NULL){
+        return NULL;
+    }
+
+    while(strcmp(elem->msg->remetente, remetente) == 0)
     {
-        if(strcmp(elem->msg->remetente, remetente) == 0){
-            if(prioridade > elem->prioridade){
-                break;
+        if(prioridade > elem->prioridade){
+            break;
+        }
+        if(prioridade <= elem->prioridade){
+            
+            aux = (elemento*) malloc(sizeof(elemento)*(i+1));
+            
+            mensagem * m = cria_mensagem2(elem);
+            
+            if(m == NULL){
+                free(aux);
+                return NULL;
             }
-            if(prioridade <= elem->prioridade){
-                char *text = (char*) malloc(sizeof(char)*(strlen(elem->msg->texto)+1));
 
-                if(text == NULL){
-                    return NULL;
-                }
-
-                mensagem *m = (mensagem*) malloc(sizeof(mensagem));
-
-                if(m == NULL){
-                    free(text);
-                    return NULL;
-                }
-
-                aux = (elemento*) malloc(sizeof(elemento)*(i+1));
-                aux->msg = m;
-                aux->msg->texto = text;
-                
-                strcpy(aux->msg->destinatario, elem->msg->destinatario);
-                strcpy(aux->msg->remetente, elem->msg->remetente);
-                strcpy(aux->msg->texto, elem->msg->texto);
-                
-                if(i == 0){
-                    prioridade = elem->prioridade;
-                    inicio = aux;
-                } else {
-                    aux2->proximo = aux;
-                }
-                
-                aux2 = aux;
-                aux = aux->proximo;
-                i++;
-
-                aux3 = elem->proximo;
-                elemento_apaga(st, elem);
-                elem = aux3;
+            aux->msg = m;
+            
+            if(i == 0){
+                prioridade = elem->prioridade;
+                inicio = aux;
+            } else {
+                aux2->proximo = aux;
             }
-        } else {
-            elem = elem->proximo;
+            
+            aux2 = aux;
+            aux = aux->proximo;
+            i++;
+
+            aux3 = elem->proximo;
+            elemento_apaga(st, elem);
+            elem = aux3;
         }
     }
 
     aux2->proximo= NULL;
 
+    end_t = clock();
+    printf("\t%d Tempo a remover: %.8f\n",i, (double)(end_t - start_t) / CLOCKS_PER_SEC);
     return inicio; 
 }
  
