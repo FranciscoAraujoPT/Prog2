@@ -359,34 +359,40 @@ no_grafo **lista_amigos(grafo *g, char *nomeU, int *n)
     return NULL;
 }
 
-int dfs(no_grafo *no, int indice, int M, int resultados[])
+no_grafo * dfs(no_grafo *no, int *indice, int M, no_grafo* resultados[])
 {   
-    if(resultados[indice] ==  indice){
-        return indice;
+    if(resultados[*indice] ==  resultados[0]){
+        return resultados[*indice];
     }
 
-    resultados[indice] = indice;
+    resultados[*indice] = no;
 
-    int i = 0, d;
-    while(indice < M)
+    no_grafo *d;
+    int i = 0;
+    while((*indice) < M)
     {
          if(no->tamanho > i){
-            indice++;
+            (*indice)++;
             no = no->ligacoes[i]->destino;
             printf("%d: %s\n",i, no->nome_user);
             d = dfs(no, indice, M,resultados);
             if(d){
                 return d;
             }
-            resultados[indice] = 0;
-            indice--;
+            resultados[*indice] = NULL;
+            (*indice)--;
             i++;
         } else {
-            return 0;
+            resultados[*indice] = NULL;
+            (*indice)--;
+            return NULL;
         }
     }
 
-    return 0;
+    resultados[*indice] = NULL;
+    (*indice)--;
+
+    return NULL;
 }
 
 
@@ -411,14 +417,12 @@ no_grafo ** identifica_ciclo(grafo *g, char *nomeU, int M, int *n)
         return NULL;
     }
     
-    no_grafo ** ciclo = (no_grafo**) malloc(sizeof(no_grafo*)*M);
+    no_grafo ** ciclo = (no_grafo**) calloc(M,sizeof(no_grafo*));
 
     if (ciclo == NULL){
         return NULL;
     }
 
-    int *resultados = calloc(M, sizeof(int));
-    
     ciclo[0] = encontra_no(g, nomeU);
     printf("0: %s\n", ciclo[0]->nome_user);
 
@@ -427,16 +431,15 @@ no_grafo ** identifica_ciclo(grafo *g, char *nomeU, int M, int *n)
     }
 
     int i = 0, indice = 1;
-    resultados[0] = 1;
 
     while(ciclo[0]->tamanho > i)
     {
         ciclo[1] = ciclo[0]->ligacoes[i]->destino;
         printf("1: %s\n", ciclo[1]->nome_user);
-        if((indice = dfs(ciclo[1], indice, M, resultados))){
+        if(dfs(ciclo[1], &indice, M, ciclo) != NULL){
             for(int j=0;i<indice;j++)
             {
-            printf("%d\n", resultados[j]);
+            printf("%s\n", ciclo[j]->nome_user);
 
             }
             return NULL;
@@ -447,7 +450,7 @@ no_grafo ** identifica_ciclo(grafo *g, char *nomeU, int M, int *n)
     printf("indice = %d\n", indice);
     for(int j=0;i<indice;j++)
     {
-        printf("%d\n", resultados[j]);
+        printf("%s\n", ciclo[j]->nome_user);
 
     }
 
