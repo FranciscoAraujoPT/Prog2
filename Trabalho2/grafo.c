@@ -359,40 +359,42 @@ no_grafo **lista_amigos(grafo *g, char *nomeU, int *n)
     return NULL;
 }
 
-no_grafo * dfs(no_grafo *no, int *indice, int M, no_grafo* resultados[])
+int dfs(no_grafo *no, int indice, int M, no_grafo* resultados[])
 {   
-    if(resultados[*indice] ==  resultados[0]){
-        return resultados[*indice];
+    if(indice >= M){
+        indice--;
+        return 0;
     }
 
-    resultados[*indice] = no;
+    if(indice != 0){
+        if(resultados[indice] ==  resultados[0]){
+            return indice;
+        }
+    }
 
-    no_grafo *d;
-    int i = 0;
-    while((*indice) < M)
+    resultados[indice] = no;
+
+    int i = 0, d;
+    while(indice < M)
     {
          if(no->tamanho > i){
-            (*indice)++;
+            indice++;
             no = no->ligacoes[i]->destino;
             printf("%d: %s\n",i, no->nome_user);
             d = dfs(no, indice, M,resultados);
             if(d){
-                return d;
+                return indice;
             }
-            resultados[*indice] = NULL;
-            (*indice)--;
+            indice--;
             i++;
         } else {
-            resultados[*indice] = NULL;
-            (*indice)--;
-            return NULL;
+            indice--;
+            return 0;
         }
     }
-
-    resultados[*indice] = NULL;
-    (*indice)--;
-
-    return NULL;
+    
+    indice--;
+    return 0;
 }
 
 
@@ -430,22 +432,9 @@ no_grafo ** identifica_ciclo(grafo *g, char *nomeU, int M, int *n)
         return NULL;
     }
 
-    int i = 0, indice = 1;
+    int i = 0, indice = 0;
 
-    while(ciclo[0]->tamanho > i)
-    {
-        ciclo[1] = ciclo[0]->ligacoes[i]->destino;
-        printf("1: %s\n", ciclo[1]->nome_user);
-        if(dfs(ciclo[1], &indice, M, ciclo) != NULL){
-            for(int j=0;i<indice;j++)
-            {
-            printf("%s\n", ciclo[j]->nome_user);
-
-            }
-            return NULL;
-        }
-        i++;
-    }
+    dfs(ciclo[0], indice, M, ciclo);
 
     printf("indice = %d\n", indice);
     for(int j=0;i<indice;j++)
