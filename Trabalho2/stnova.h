@@ -11,9 +11,9 @@
 
 typedef struct _l_elemento
 {
-	;
+	int tamanho_elem;
 	int prioridade;
-	mensagem *msg;
+	elemento * elem;
 	struct _l_elemento *proximo;
 	struct _l_elemento *anterior;
 
