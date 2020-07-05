@@ -362,38 +362,33 @@ no_grafo **lista_amigos(grafo *g, char *nomeU, int *n)
 int dfs(no_grafo *no, int indice, int M, no_grafo* resultados[])
 {   
     if(indice >= M){
-        indice--;
         return 0;
     }
 
-    if(indice != 0){
-        if(resultados[indice] ==  resultados[0]){
+    if(indice > 0){
+        if(no ==  resultados[0]){
             return indice;
         }
     }
 
     resultados[indice] = no;
 
-    int i = 0, d;
-    while(indice < M)
+    int d;
+    for(int i=0;i<no->tamanho;i++)
     {
          if(no->tamanho > i){
-            indice++;
             no = no->ligacoes[i]->destino;
             printf("%d: %s\n",i, no->nome_user);
-            d = dfs(no, indice, M,resultados);
-            if(d){
+            d = dfs(no, indice+1, M,resultados);
+            if(d > 0){
                 return indice;
             }
             indice--;
-            i++;
         } else {
-            indice--;
             return 0;
         }
     }
     
-    indice--;
     return 0;
 }
 
