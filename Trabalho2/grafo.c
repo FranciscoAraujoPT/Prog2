@@ -373,16 +373,14 @@ int dfs(no_grafo *no, int indice, int M, no_grafo* resultados[])
 
     resultados[indice] = no;
 
-    int d;
+    int ciclo_encontrado = 0;
     for(int i=0;i<no->tamanho;i++)
     {
-        no = no->ligacoes[i]->destino;
         printf("%d: %s\n",i, no->nome_user);
-        d = dfs(no, indice+1, M,resultados);
-        if(d > 0){
-            return indice;
+        ciclo_encontrado = dfs(no->ligacoes[i]->destino, indice+1, M,resultados);
+        if(ciclo_encontrado > 0){
+            return ciclo_encontrado;
         }
-        indice--;
     }
     
     return 0;
@@ -423,15 +421,17 @@ no_grafo ** identifica_ciclo(grafo *g, char *nomeU, int M, int *n)
         return NULL;
     }
 
-    int i = 0, indice = 0;
-
-    indice = dfs(ciclo[0], indice, M, ciclo);
-
+    int indice = dfs(ciclo[0], 0, M, ciclo);
     printf("indice = %d\n", indice);
-    for(int j=0;i<indice;j++)
+    for(int j=0;j<indice;j++)
     {
         printf("%s\n", ciclo[j]->nome_user);
 
+    }
+
+    if (indice > 0) {
+        *n = indice;
+        return ciclo;
     }
 
     return NULL;
