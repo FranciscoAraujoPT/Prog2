@@ -7,6 +7,7 @@
 #include <string.h>
 #include "grafo.h"
 
+#define PESO_AMIGO 4
 
 grafo* grafo_novo()
 {
@@ -102,11 +103,8 @@ no_grafo * no_insere(grafo *g, char *user)
         return NULL;
     }
 
-    for(int i=0;i<g->tamanho;i++)
-    {
-        if(strcmp(g->nos[i]->nome_user, user) == 0){
-            return NULL;
-        }
+    if(encontra_no(g, user) != NULL){
+        return NULL;
     }
     
     no_grafo **aux = g->nos;
@@ -238,31 +236,31 @@ grafo * criaGrafo(tabela_dispersao *td)
         elem = td->elementos[i];
         while(elem != NULL)
         {   
-            origem = no_insere(g, elem->msg->remetente);
-            dest = no_insere(g, elem->msg->destinatario);
-            
-            ligacao2(td, elem->msg->remetente, elem->msg->destinatario, msg);
+            if(elem->msg != NULL){
+                
+                origem = encontra_no(g, elem->msg->remetente);
+                dest = encontra_no(g, elem->msg->destinatario);
 
-            if(msg[0]>0){
-                if(origem == NULL){
-                    origem = encontra_no(g, elem->msg->remetente);
+                if(origem == NULL || dest == NULL){
+                    if(origem == NULL){
+                        origem = no_insere(g, elem->msg->remetente);
+                    }
+
+                    if(dest == NULL){
+                        dest = no_insere(g, elem->msg->destinatario);
+                    }
+
+                    ligacao2(td, elem->msg->remetente, elem->msg->destinatario, msg);
+
+                    if(msg[0]>0){
+                        cria_ligacao(origem, dest, msg[0]);
+                    }
+
+                    if(msg[1]>0){
+                        cria_ligacao(dest, origem, msg[1]);
+                    }
                 }
-                if(dest == NULL){
-                    dest = encontra_no(g, elem->msg->destinatario);
-                }
-                cria_ligacao(origem, dest, msg[0]);
             }
-
-            if(msg[1]>0){
-                if(origem == NULL){
-                    origem = encontra_no(g, elem->msg->remetente);
-                }
-                if(dest == NULL){
-                    dest = encontra_no(g, elem->msg->destinatario);
-                }
-                cria_ligacao(dest, origem, msg[1]);
-            }
-
             elem = elem->proximo;
         }
     }
@@ -286,46 +284,52 @@ no_grafo **lista_amigos(grafo *g, char *nomeU, int *n)
         return NULL;
     }
 
-    no_grafo ** amigos = NULL, **amigo =  NULL;
+    no_grafo ** amigos = NULL, **candidatos_amigo =  NULL;
     no_grafo *no;
-    int amigo1 = 0, count = 0;
-    *n = 0;
-
-    if((no = encontra_no(g, nomeU)) == NULL){
+    int count = 0, tamanho = 0;
+    
+    no = encontra_no(g, nomeU);
+    
+    if(no == NULL){
         return NULL;
     }
 
     for(int i=0;i<no->tamanho;i++)
     {
-        if(no->ligacoes[i]->peso_ligacao >= 4){
-            amigo1 = 1;
-            amigo = (no_grafo **) realloc(amigo, sizeof(no_grafo)*(count+1));
-            amigo[count] = no->ligacoes[i]->destino;
+        if(no->ligacoes[i]->peso_ligacao >= PESO_AMIGO){
+            candidatos_amigo = (no_grafo **) realloc(candidatos_amigo, sizeof(no_grafo)*(count+1));
+            if(candidatos_amigo == NULL){
+                return NULL;
+            }
+            candidatos_amigo[count] = no->ligacoes[i]->destino;
             count++;
         }
     }
     
-    if(amigo1 == 1){
+    if(count != 0){
         for(int i=0;i<count;i++)
         {
-            for(int j=0;j<amigo[i]->tamanho;j++)
+            for(int j=0;j<candidatos_amigo[i]->tamanho;j++)
             {
-                if(strcmp(amigo[i]->ligacoes[j]->destino->nome_user, nomeU) == 0){
-                    if(amigo[i]->ligacoes[j]->peso_ligacao >= 4){
-                        amigos = (no_grafo **) realloc(amigos, sizeof(no_grafo)*((*n)+1));
+                if(strcmp(candidatos_amigo[i]->ligacoes[j]->destino->nome_user, nomeU) == 0){
+                    if(candidatos_amigo[i]->ligacoes[j]->peso_ligacao >= PESO_AMIGO){
+                        amigos = (no_grafo **) realloc(amigos, sizeof(no_grafo)*((tamanho)+1));
                         if(amigos == NULL){
+                            free(candidatos_amigo);
                             return NULL;
                         }
-                        amigos[*n] = amigo[i];
-                        (*n)++;
+                        amigos[tamanho] = candidatos_amigo[i];
+                        (tamanho)++;
                         break;
                     }
                 }
             }
         }   
     }
-
-    if((*n)>0){
+    free(candidatos_amigo);
+    
+    if(tamanho > 0){
+        *n = tamanho;
         return amigos;
     }
 
@@ -334,33 +338,31 @@ no_grafo **lista_amigos(grafo *g, char *nomeU, int *n)
 
 int ajuda_identifica_ciclo(no_grafo *ciclo,int visitados[], int pilha[], int n, int M)
 {
-    int indice = (int)(ciclo->nome_user[0]);
-
-    if(visitados[indice] == 0) 
-    { 
-        visitados[indice] = 1; 
-        pilha[indice] = 1; 
+    // if(visitados[indice] == 0) 
+    // { 
+    //     visitados[indice] = 1; 
+    //     pilha[indice] = 1; 
   
-        int i;
+    //     int i;
 
-        for( i = 0; i<ciclo->tamanho; i++)
-        { 
-            ciclo = ciclo->ligacoes[i]->destino;
-            if (!visitados[indice]){
-                if(ajuda_identifica_ciclo(ciclo, visitados, pilha, n, M)){
-                    printf("%d---> %s\n", n, ciclo->nome_user);
-                    return 1;
-                } 
-            } else if (pilha[indice]){ 
-                printf("%d <<<< %s\n", n, ciclo->nome_user);
-                return 1; 
-            }
-        } 
-    }
+    //     for( i = 0; i<ciclo->tamanho; i++)
+    //     { 
+    //         ciclo = ciclo->ligacoes[i]->destino;
+    //         if (!visitados[indice]){
+    //             if(ajuda_identifica_ciclo(ciclo, visitados, pilha, n, M)){
+    //                 printf("%d---> %s\n", n, ciclo->nome_user);
+    //                 return 1;
+    //             } 
+    //         } else if (pilha[indice]){ 
+    //             printf("%d <<<< %s\n", n, ciclo->nome_user);
+    //             return 1; 
+    //         }
+    //     } 
+    // }
 
-    if(n != 0){ 
-        pilha[indice] = 0;
-    }
+    // if(n != 0){ 
+    //     pilha[indice] = 0;
+    //}
 
     return 0;
 }
@@ -400,8 +402,8 @@ no_grafo ** identifica_ciclo(grafo *g, char *nomeU, int M, int *n)
     //     return NULL;
     // }
 
-    // int *visitados = calloc(10000000000, sizeof(int)); 
-    // int *pilha= calloc(10000000000, sizeof(int));
+    // int *visitados = calloc(10000, sizeof(int)); 
+    // int *pilha= calloc(10000, sizeof(int));
     
     // int indice0 = (int)(ciclo[0]->nome_user[0]);
     // printf("%d\n", indice0);
