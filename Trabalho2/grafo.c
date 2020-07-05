@@ -63,7 +63,6 @@ void grafo_apaga(grafo* g)
     free(g);
 }
 
-
 no_grafo * cria_no(char *user)
 {
     if(user == NULL){
@@ -90,7 +89,6 @@ no_grafo * cria_no(char *user)
 
     return no;
 }
-
 
 no_grafo * no_insere(grafo *g, char *user)
 {
@@ -190,7 +188,6 @@ int  cria_ligacao(no_grafo *origem, no_grafo *destino, int peso)
     return 0;
 }
 
-
 no_grafo * encontra_no(grafo *g, char *nomeU)
 {
     
@@ -231,7 +228,6 @@ int grafo_aresta(no_grafo* origem, no_grafo* dest)
 
     return 0;
 }
-
 
 grafo * criaGrafo(tabela_dispersao *td)
 {
@@ -290,8 +286,6 @@ grafo * criaGrafo(tabela_dispersao *td)
 
     return g;
 }
-
-
 
 no_grafo **lista_amigos(grafo *g, char *nomeU, int *n)
 {
@@ -361,11 +355,17 @@ no_grafo **lista_amigos(grafo *g, char *nomeU, int *n)
 
 int dfs(no_grafo *no, int indice, int M, no_grafo* resultados[])
 {   
-    if(indice >= M){
+    if(indice > M){
         return 0;
     }
 
-    if(indice > 0){
+    for(int i=1;i<indice;i++){ //Impede que a função volte a processar nos já processados.
+        if(no == resultados[i]){
+            return 0;
+        }
+    }
+    
+    if(indice > 1){ //Não deixa retornar ciclos com menos de 2 utilizadores além do utilizador nomeU.
         if(no ==  resultados[0]){
             return indice;
         }
@@ -376,7 +376,7 @@ int dfs(no_grafo *no, int indice, int M, no_grafo* resultados[])
     int ciclo_encontrado = 0;
     for(int i=0;i<no->tamanho;i++)
     {
-        printf("%d: %s\n",i, no->nome_user);
+        //printf("%d: %s\t%s %d\n",i, no->nome_user, no->ligacoes[i]->destino->nome_user,indice);
         ciclo_encontrado = dfs(no->ligacoes[i]->destino, indice+1, M,resultados);
         if(ciclo_encontrado > 0){
             return ciclo_encontrado;
@@ -390,8 +390,6 @@ int dfs(no_grafo *no, int indice, int M, no_grafo* resultados[])
 
 no_grafo ** identifica_ciclo(grafo *g, char *nomeU, int M, int *n)
 {
-
-
     if(g == NULL){
         return NULL;
     }
@@ -408,26 +406,19 @@ no_grafo ** identifica_ciclo(grafo *g, char *nomeU, int M, int *n)
         return NULL;
     }
     
-    no_grafo ** ciclo = (no_grafo**) calloc(M,sizeof(no_grafo*));
+    no_grafo ** ciclo = (no_grafo**) calloc(M+1,sizeof(no_grafo*));
 
     if (ciclo == NULL){
         return NULL;
     }
 
     ciclo[0] = encontra_no(g, nomeU);
-    printf("0: %s\n", ciclo[0]->nome_user);
 
     if(ciclo[0] == NULL){
         return NULL;
     }
-
+    
     int indice = dfs(ciclo[0], 0, M, ciclo);
-    printf("indice = %d\n", indice);
-    for(int j=0;j<indice;j++)
-    {
-        printf("%s\n", ciclo[j]->nome_user);
-
-    }
 
     if (indice > 0) {
         *n = indice;
