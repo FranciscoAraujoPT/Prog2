@@ -212,7 +212,25 @@ no_grafo * encontra_no(grafo *g, char *nomeU)
     return NULL;
 }
 
+int grafo_aresta(no_grafo* origem, no_grafo* dest)
+{
+    if(origem == NULL){
+        return 0;
+    }
 
+    if(dest == NULL){
+        return 0;
+    }
+
+    for(int i=0;i<origem->tamanho;i++)
+    {
+        if(origem->ligacoes[i]->destino == dest){
+            return 1;
+        }
+    }
+
+    return 0;
+}
 
 
 grafo * criaGrafo(tabela_dispersao *td)
@@ -241,24 +259,29 @@ grafo * criaGrafo(tabela_dispersao *td)
                 origem = encontra_no(g, elem->msg->remetente);
                 dest = encontra_no(g, elem->msg->destinatario);
 
-                if(origem == NULL || dest == NULL){
-                    if(origem == NULL){
-                        origem = no_insere(g, elem->msg->remetente);
+                if(origem != NULL && dest != NULL){
+                    if(grafo_aresta(origem, dest)){
+                        elem = elem->proximo;
+                        continue;
                     }
+                }
 
-                    if(dest == NULL){
-                        dest = no_insere(g, elem->msg->destinatario);
-                    }
+                if(origem == NULL){
+                    origem = no_insere(g, elem->msg->remetente);
+                }
 
-                    ligacao2(td, elem->msg->remetente, elem->msg->destinatario, msg);
+                if(dest == NULL){
+                    dest = no_insere(g, elem->msg->destinatario);
+                }
 
-                    if(msg[0]>0){
-                        cria_ligacao(origem, dest, msg[0]);
-                    }
+                ligacao2(td, elem->msg->remetente, elem->msg->destinatario, msg);
 
-                    if(msg[1]>0){
-                        cria_ligacao(dest, origem, msg[1]);
-                    }
+                if(msg[0]>0){
+                    cria_ligacao(origem, dest, msg[0]);
+                }
+
+                if(msg[1]>0){
+                    cria_ligacao(dest, origem, msg[1]);
                 }
             }
             elem = elem->proximo;
@@ -336,33 +359,32 @@ no_grafo **lista_amigos(grafo *g, char *nomeU, int *n)
     return NULL;
 }
 
-int ajuda_identifica_ciclo(no_grafo *ciclo,int visitados[], int pilha[], int n, int M)
-{
-    // if(visitados[indice] == 0) 
-    // { 
-    //     visitados[indice] = 1; 
-    //     pilha[indice] = 1; 
-  
-    //     int i;
+int dfs(no_grafo *no, int indice, int M, int resultados[])
+{   
+    if(resultados[indice] ==  indice){
+        return indice;
+    }
 
-    //     for( i = 0; i<ciclo->tamanho; i++)
-    //     { 
-    //         ciclo = ciclo->ligacoes[i]->destino;
-    //         if (!visitados[indice]){
-    //             if(ajuda_identifica_ciclo(ciclo, visitados, pilha, n, M)){
-    //                 printf("%d---> %s\n", n, ciclo->nome_user);
-    //                 return 1;
-    //             } 
-    //         } else if (pilha[indice]){ 
-    //             printf("%d <<<< %s\n", n, ciclo->nome_user);
-    //             return 1; 
-    //         }
-    //     } 
-    // }
+    resultados[indice] = indice;
 
-    // if(n != 0){ 
-    //     pilha[indice] = 0;
-    //}
+    int i = 0, d;
+    while(indice < M)
+    {
+         if(no->tamanho > i){
+            indice++;
+            no = no->ligacoes[i]->destino;
+            printf("%d: %s\n",i, no->nome_user);
+            d = dfs(no, indice, M,resultados);
+            if(d){
+                return d;
+            }
+            resultados[indice] = 0;
+            indice--;
+            i++;
+        } else {
+            return 0;
+        }
+    }
 
     return 0;
 }
@@ -389,35 +411,45 @@ no_grafo ** identifica_ciclo(grafo *g, char *nomeU, int M, int *n)
         return NULL;
     }
     
-    // no_grafo ** ciclo = (no_grafo**) malloc(sizeof(no_grafo*)*M);
+    no_grafo ** ciclo = (no_grafo**) malloc(sizeof(no_grafo*)*M);
 
-    // if (ciclo == NULL){
-    //     return NULL;
-    // }
+    if (ciclo == NULL){
+        return NULL;
+    }
+
+    int *resultados = calloc(M, sizeof(int));
     
-    // ciclo[0] = encontra_no(g, nomeU);
-    // printf("0: %s\n", ciclo[0]->nome_user);
+    ciclo[0] = encontra_no(g, nomeU);
+    printf("0: %s\n", ciclo[0]->nome_user);
 
-    // if(ciclo[0] == NULL){
-    //     return NULL;
-    // }
+    if(ciclo[0] == NULL){
+        return NULL;
+    }
 
-    // int *visitados = calloc(10000, sizeof(int)); 
-    // int *pilha= calloc(10000, sizeof(int));
-    
-    // int indice0 = (int)(ciclo[0]->nome_user[0]);
-    // printf("%d\n", indice0);
-    // visitados[indice0] = 1; 
-    // pilha[indice0] = 1; 
+    int i = 0, indice = 1;
+    resultados[0] = 1;
 
-    // for((*n) = 1; (*n) < ciclo[0]->tamanho; (*n)++){
-    //     ciclo[1] = ciclo[0]->ligacoes[(*n)+1]->destino;
-    //     printf("%s\n", ciclo[1]->nome_user);
-    //     if (ajuda_identifica_ciclo(ciclo[1], visitados, pilha, *n, M)){
-    //         return ciclo;
-    //     }
+    while(ciclo[0]->tamanho > i)
+    {
+        ciclo[1] = ciclo[0]->ligacoes[i]->destino;
+        printf("1: %s\n", ciclo[1]->nome_user);
+        if((indice = dfs(ciclo[1], indice, M, resultados))){
+            for(int j=0;i<indice;j++)
+            {
+            printf("%d\n", resultados[j]);
 
-    // }
+            }
+            return NULL;
+        }
+        i++;
+    }
+
+    printf("indice = %d\n", indice);
+    for(int j=0;i<indice;j++)
+    {
+        printf("%d\n", resultados[j]);
+
+    }
 
     return NULL;
 }
