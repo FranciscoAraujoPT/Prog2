@@ -101,16 +101,6 @@ l_elemento *clona_l_elemento(estrutura *st, elemento *elem, tabela_dispersao* td
 		return NULL;
     }
     
-    l_elemento *aux = lista_elemento(st, elem_clone->msg->remetente);
-    
-    if(aux != NULL){
-        if((strcmp(aux->elem->msg->destinatario,elem_clone->msg->destinatario) == 0)){
-            aux->elem->proximo = elem_clone;
-            elem_clone->proximo = NULL;
-            return NULL;
-        }
-    }
-    
     l_elemento *item = (l_elemento *) malloc(sizeof(l_elemento));
 	
     if(item == NULL){
@@ -118,15 +108,27 @@ l_elemento *clona_l_elemento(estrutura *st, elemento *elem, tabela_dispersao* td
 		return NULL;
     }
 
-    item->elem = elem_clone;
-    item->elem->proximo = NULL;
+    l_elemento *aux = lista_elemento(st, elem_clone->msg->remetente);
+    
+    if((aux != NULL && (strcmp(aux->elem->msg->destinatario,elem_clone->msg->destinatario) == 0))){
+        while(aux->elem->proximo != NULL){
+            aux->elem = aux->elem->proximo;
+            printf("Meio: %s\n", aux->elem->msg->remetente);
+        }
+        aux->elem->proximo = elem_clone;
+        elem_clone->proximo = NULL;
+        return NULL;        
+    } else {
+        item->elem = elem_clone;
+        item->elem->proximo = NULL;
 
-    int msg[2];
-    ligacao2(td, item->elem->msg->remetente, item->elem->msg->destinatario, msg);
+        int msg[2];
+        ligacao2(td, item->elem->msg->remetente, item->elem->msg->destinatario, msg);
 
-    item->prioridade = msg[0] + msg[1];
-    item->proximo = NULL;
-    item->anterior = NULL;
+        item->prioridade = msg[0] + msg[1];
+        item->proximo = NULL;
+        item->anterior = NULL;
+    }
 
     return item;
 }
@@ -145,29 +147,7 @@ int st_insere_tabela(estrutura *st, elemento *elem, tabela_dispersao* td){
         return 0;
     }
 
-    /* calcula hash para a string a adicionar */
     int index = st->hfunc(elem->msg->remetente, td->tamanho);
-
-    /* novo elemento, chave nao existe na lista */
-    if(index >= st->tamanho){
-        st->elementos = (hash_elemento **) realloc(st->elementos, sizeof(hash_elemento*)*(index+1));
-        
-        for(int i=st->tamanho;i<index+1;i++){
-            hash_elemento* hash = (hash_elemento*) malloc(sizeof(hash_elemento));
-            
-            if(hash == NULL){
-                return 0;
-            }
-            
-            st->elementos[i] = hash;
-            st->elementos[i]->inicio = NULL;
-            st->elementos[i]->fim = NULL;
-            st->elementos[i]->curr = NULL; 
-            st->tamanho++;
-        }
-
-           
-    }
 
     l_elemento *l_elem = clona_l_elemento(st,elem,td);
 
@@ -175,16 +155,14 @@ int st_insere_tabela(estrutura *st, elemento *elem, tabela_dispersao* td){
         return 0;
     }
 
-    if(st->elementos[index]->inicio == NULL){
-        st->elementos[index]->inicio = l_elem;
-        st->elementos[index]->fim = l_elem;
-        st->elementos[index]->curr = l_elem;
-    } else {
-        st->elementos[index]->curr = l_elem;
+    printf("%s\t%s\n",l_elem->elem->msg->remetente, l_elem->elem->msg->destinatario);
+    
+    st->elementos[index]->curr = l_elem;
+    st->elementos[index]->curr->anterior = NULL;
+    st->elementos[index]->curr->proximo = NULL;
 
-        if(st_insere(st, l_elem->elem) == -1){
-            return 0;
-        }
+    if(st_insere(st, elem) == -1){
+        return 0;
     }
 
     return 1;
@@ -202,19 +180,28 @@ int st_insere(estrutura *st, elemento *elem)
     }
 
     int index = st->hfunc(elem->msg->remetente, st->tamanho);
+    int inicio_prioridade = -1;
+    int fim_prioridade = -1;
 
     l_elemento * pos = st->elementos[index]->inicio, *curr = st->elementos[index]->curr;
     
+    if(st->elementos[index]->fim != NULL){
+        fim_prioridade = st->elementos[index]->fim->prioridade;
+    }
+    
+    if(st->elementos[index]->inicio != NULL){
+        inicio_prioridade = st->elementos[index]->inicio->prioridade;
+    }
 
-    if(st->tamanho == 0){
+    if(st->elementos[index]->inicio == NULL){
         st->elementos[index]->inicio = st->elementos[index]->fim = curr;
     } else {
-        if (curr->prioridade <= st->elementos[index]->fim->prioridade){
+        if (curr->prioridade <= fim_prioridade){
             curr->anterior = st->elementos[index]->fim;
 		    st->elementos[index]->fim->proximo = curr;
 		    st->elementos[index]->fim = curr;
         } else {
-            if (curr->prioridade > st->elementos[index]->inicio->prioridade){
+            if (curr->prioridade > inicio_prioridade){
                 curr->proximo = st->elementos[index]->inicio;
                 st->elementos[index]->inicio->anterior = curr;
                 st->elementos[index]->inicio = curr;
@@ -247,13 +234,34 @@ int st_importa_tabela(estrutura *st, tabela_dispersao *td)
 
     elemento *elem;
 
+    st->tamanho = td->tamanho;
+
+    st->elementos = (hash_elemento **) realloc(st->elementos, sizeof(hash_elemento*)*st->tamanho);
+    
+    if(st->elementos == NULL){
+        return -1;
+    }
+        
+    for(int i=0;i<st->tamanho;i++){
+        hash_elemento* hash = (hash_elemento*) malloc(sizeof(hash_elemento));
+        
+        if(hash == NULL){
+            st_apaga(st);
+            return -1;
+        }
+        
+        st->elementos[i] = hash;
+        st->elementos[i]->inicio = NULL;
+        st->elementos[i]->fim = NULL;
+        st->elementos[i]->curr = NULL; 
+    }
+
     for(int i=0;i<td->tamanho;i++){
         elem = td->elementos[i];
         while(elem != NULL)
         {   
-            if(st_insere_tabela(st, elem, td) == 0){
-                return -1;
-            }
+            printf("original: %s\t%s\n",elem->msg->remetente, elem->msg->destinatario);
+            st_insere_tabela(st, elem, td);
             elem = elem->proximo;
         }
     }
@@ -303,9 +311,37 @@ elemento *st_remove(estrutura *st,char *remetente)
 		return NULL;
     }
 
+    int index = st->hfunc(remetente, st->tamanho);
+
+    st->elementos[index]->curr = lista_elemento(st, remetente);
+
+    if(st->elementos[index]->curr == NULL){
+        return NULL;
+    }
+
+    elemento *removido = st->elementos[index]->curr->elem;
+    
+    if(st->elementos[index]->curr->anterior != NULL){
+		st->elementos[index]->curr->anterior->proximo = st->elementos[index]->curr->proximo;
+	} else{
+		st->elementos[index]->inicio = st->elementos[index]->curr->proximo;
+    }
+
+	if(st->elementos[index]->curr->proximo != NULL){
+		st->elementos[index]->curr->proximo->anterior = st->elementos[index]->curr->anterior;
+	} else {
+		st->elementos[index]->fim = st->elementos[index]->curr->anterior;
+    }
+
+    free(st->elementos[index]->curr);
+    
+    while(removido != NULL){
+        printf("Final: %s\n", removido->msg->destinatario);
+        removido = removido->proximo;
+    }
     end_t = clock();
     printf("\tTempo a remover: %.8f\n", (double)(end_t - start_t) / CLOCKS_PER_SEC);
-    return NULL; 
+    return removido; 
 }
  
 void elemento_apaga(hash_elemento* elem, l_elemento *item)
