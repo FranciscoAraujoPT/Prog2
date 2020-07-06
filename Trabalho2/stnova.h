@@ -14,7 +14,6 @@
 
 typedef struct _l_elemento
 {
-	int prioridade;
 	elemento * elem;
 	struct _l_elemento *proximo;
 	struct _l_elemento *anterior;
@@ -27,12 +26,12 @@ typedef struct
  	l_elemento *inicio;
 	l_elemento *fim;
 
-} hash_elemento;
+} destinatarios;
 
 typedef struct
 {
 	hash_func *hfunc;		/* apontador para a funcao hash_krm*/
-	hash_elemento **elementos;	/* vetor de elementos */
+	destinatarios **elementos;	/* vetor de elementos */
 	int tamanho;			/* tamanho do vetor de elementos */
 
 } estrutura;
