@@ -6,7 +6,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 #include "stnova.h"
 
 
@@ -225,9 +224,6 @@ l_elemento* lista_primeiro_elemento(estrutura *st, char* nomeU1)
 
 elemento *st_remove(estrutura *st,char *remetente)
 {
-    clock_t start_t, end_t;
-    start_t = clock(); 
-
     if(remetente == NULL){
         return NULL;
     }
@@ -287,9 +283,6 @@ elemento *st_remove(estrutura *st,char *remetente)
     }
 
     aux2->proximo= NULL;
-
-    end_t = clock();
-    printf("\t%d Tempo a remover: %.8f\n",i, (double)(end_t - start_t) / CLOCKS_PER_SEC);
     return inicio; 
 }
  

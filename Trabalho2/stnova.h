@@ -11,7 +11,6 @@
 
 typedef struct _l_elemento
 {
-	;
 	int prioridade;
 	mensagem *msg;
 	struct _l_elemento *proximo;
