@@ -631,7 +631,7 @@ int main()
      
     st_apaga(st); 
     tabela_apaga(td);
-    grafo_apaga(g); 
+    grafo_apaga(g);
    
 /*================================================= */
 /* Com um ficheiro maior */

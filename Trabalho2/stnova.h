@@ -9,11 +9,22 @@
 
 /* podem criar mais struct que achem necessárias*/
 
+typedef struct _l_elemento
+{
+	int prioridade;
+	mensagem *msg;
+	struct _l_elemento *proximo;
+	struct _l_elemento *anterior;
 
+} l_elemento;
 
 typedef struct
 {
- 		
+	l_elemento *curr;
+ 	l_elemento *inicio;
+	l_elemento *fim;
+	int tamanho;
+
 } estrutura;
 
 
