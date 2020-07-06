@@ -9,6 +9,7 @@
 
 #define PESO_AMIGO 4
 
+/* cria grafo vazio*/
 grafo* grafo_novo()
 {
     grafo* g = (grafo*)malloc(sizeof(grafo));
@@ -23,6 +24,7 @@ grafo* grafo_novo()
     return g;
 }
 
+/* apaga no e liberta memoria */
 void no_apaga(no_grafo *no)
 {
     if(no == NULL){
@@ -46,6 +48,7 @@ void no_apaga(no_grafo *no)
     free(no);
 }
 
+/* apaga grafo e liberta memoria */
 void grafo_apaga(grafo* g)
 {
     if(g == NULL){
@@ -63,6 +66,7 @@ void grafo_apaga(grafo* g)
     free(g);
 }
 
+/* Cria e aloca memoria para um nó */
 no_grafo * cria_no(char *user)
 {
     if(user == NULL){
@@ -90,6 +94,7 @@ no_grafo * cria_no(char *user)
     return no;
 }
 
+/* insire um nó no grafo*/
 no_grafo * no_insere(grafo *g, char *user)
 {
 
@@ -101,7 +106,7 @@ no_grafo * no_insere(grafo *g, char *user)
         return NULL;
     }
 
-    if(encontra_no(g, user) != NULL){
+    if(encontra_no(g, user) != NULL){ //Verifica que nó não está no grafo
         return NULL;
     }
     
@@ -125,6 +130,7 @@ no_grafo * no_insere(grafo *g, char *user)
     return no;
 }
 
+/* Cria e aloca memoria para uma ligação */
 ligacao * cria_lig(no_grafo *destino,int peso)
 {
     if(destino == NULL){
@@ -147,6 +153,7 @@ ligacao * cria_lig(no_grafo *destino,int peso)
     return lig;
 }
 
+/* Insire uma ligação no grafo*/
 int  cria_ligacao(no_grafo *origem, no_grafo *destino, int peso)
 {
     if(origem == NULL){
@@ -161,7 +168,7 @@ int  cria_ligacao(no_grafo *origem, no_grafo *destino, int peso)
         return -1;
     }
 
-    for(int i=0;i<origem->tamanho;i++)
+    for(int i=0;i<origem->tamanho;i++) //Verifica que a ligação não existe no grafo
     {
         if(strcmp(origem->ligacoes[i]->destino->nome_user, destino->nome_user) == 0){
             return -1;
@@ -188,6 +195,7 @@ int  cria_ligacao(no_grafo *origem, no_grafo *destino, int peso)
     return 0;
 }
 
+/* Encontra o nó nomeU */
 no_grafo * encontra_no(grafo *g, char *nomeU)
 {
     
@@ -209,6 +217,7 @@ no_grafo * encontra_no(grafo *g, char *nomeU)
     return NULL;
 }
 
+/* verifica se existe uma aresta entre os nós origem e dest */
 int grafo_aresta(no_grafo* origem, no_grafo* dest)
 {
     if(origem == NULL){
