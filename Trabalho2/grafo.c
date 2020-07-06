@@ -9,6 +9,7 @@
 
 #define PESO_AMIGO 4
 
+/* cria grafo vazio*/
 grafo* grafo_novo()
 {
     grafo* g = (grafo*)malloc(sizeof(grafo));
@@ -23,6 +24,7 @@ grafo* grafo_novo()
     return g;
 }
 
+/* apaga no e liberta memoria */
 void no_apaga(no_grafo *no)
 {
     if(no == NULL){
@@ -46,6 +48,7 @@ void no_apaga(no_grafo *no)
     free(no);
 }
 
+/* apaga grafo e liberta memoria */
 void grafo_apaga(grafo* g)
 {
     if(g == NULL){
@@ -63,6 +66,7 @@ void grafo_apaga(grafo* g)
     free(g);
 }
 
+/* Cria e aloca memoria para um nó */
 no_grafo * cria_no(char *user)
 {
     if(user == NULL){
@@ -90,6 +94,7 @@ no_grafo * cria_no(char *user)
     return no;
 }
 
+/* insire um nó no grafo*/
 no_grafo * no_insere(grafo *g, char *user)
 {
 
@@ -125,6 +130,7 @@ no_grafo * no_insere(grafo *g, char *user)
     return no;
 }
 
+/* Cria e aloca memoria para uma ligação */
 ligacao * cria_lig(no_grafo *destino,int peso)
 {
     if(destino == NULL){
@@ -147,6 +153,7 @@ ligacao * cria_lig(no_grafo *destino,int peso)
     return lig;
 }
 
+/* Insire uma ligação no grafo*/
 int  cria_ligacao(no_grafo *origem, no_grafo *destino, int peso)
 {
     if(origem == NULL){
@@ -161,7 +168,7 @@ int  cria_ligacao(no_grafo *origem, no_grafo *destino, int peso)
         return -1;
     }
 
-    for(int i=0;i<origem->tamanho;i++)
+    for(int i=0;i<origem->tamanho;i++)//Verifica que a ligação não existe no grafo
     {
         if(strcmp(origem->ligacoes[i]->destino->nome_user, destino->nome_user) == 0){
             return -1;
@@ -188,6 +195,7 @@ int  cria_ligacao(no_grafo *origem, no_grafo *destino, int peso)
     return 0;
 }
 
+/* Encontra o nó nomeU */
 no_grafo * encontra_no(grafo *g, char *nomeU)
 {
     
@@ -209,6 +217,7 @@ no_grafo * encontra_no(grafo *g, char *nomeU)
     return NULL;
 }
 
+/* verifica se existe uma aresta entre os nós origem e dest */
 int grafo_aresta(no_grafo* origem, no_grafo* dest)
 {
     if(origem == NULL){
@@ -229,6 +238,7 @@ int grafo_aresta(no_grafo* origem, no_grafo* dest)
     return 0;
 }
 
+/* Cria um grafo atravês da tabela de dispersão td */
 grafo * criaGrafo(tabela_dispersao *td)
 {
     if(td == NULL){
@@ -251,11 +261,11 @@ grafo * criaGrafo(tabela_dispersao *td)
         while(elem != NULL)
         {   
             if(elem->msg != NULL){
-                
+                /*verifica se os nós já existem */
                 origem = encontra_no(g, elem->msg->remetente);
                 dest = encontra_no(g, elem->msg->destinatario);
 
-                if(origem != NULL && dest != NULL){
+                if(origem != NULL && dest != NULL){ //Se os nós existirem verifica se já têm uma ligação entre eles.
                     if(grafo_aresta(origem, dest)){
                         elem = elem->proximo;
                         continue;
@@ -287,6 +297,7 @@ grafo * criaGrafo(tabela_dispersao *td)
     return g;
 }
 
+/* Cria uma lista de amigos */
 no_grafo **lista_amigos(grafo *g, char *nomeU, int *n)
 {
     if(g == NULL){
@@ -323,7 +334,7 @@ no_grafo **lista_amigos(grafo *g, char *nomeU, int *n)
         }
     }
     
-    if(count != 0){
+    if(count != 0){ //No caso de não ter encontrado nenhum nos com mais de 4 mensagem enviadas retorna NULL sem fazer a segunda pesquisa.
         for(int i=0;i<count;i++)
         {
             for(int j=0;j<candidatos_amigo[i]->tamanho;j++)
@@ -353,6 +364,7 @@ no_grafo **lista_amigos(grafo *g, char *nomeU, int *n)
     return NULL;
 }
 
+/* Função recursiva que ajuda a procurar por um ciclo*/ 
 int dfs(no_grafo *no, int indice, int M, no_grafo* resultados[])
 {   
     if(indice > M){
@@ -376,7 +388,6 @@ int dfs(no_grafo *no, int indice, int M, no_grafo* resultados[])
     int ciclo_encontrado = 0;
     for(int i=0;i<no->tamanho;i++)
     {
-        //printf("%d: %s\t%s %d\n",i, no->nome_user, no->ligacoes[i]->destino->nome_user,indice);
         ciclo_encontrado = dfs(no->ligacoes[i]->destino, indice+1, M,resultados);
         if(ciclo_encontrado > 0){
             return ciclo_encontrado;
@@ -387,7 +398,7 @@ int dfs(no_grafo *no, int indice, int M, no_grafo* resultados[])
 }
 
 
-
+/* Função que identifica um ciclo a partir de um nó nomeU até M nós */
 no_grafo ** identifica_ciclo(grafo *g, char *nomeU, int M, int *n)
 {
     if(g == NULL){

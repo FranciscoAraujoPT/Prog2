@@ -138,7 +138,7 @@ mensagem **tabela_listagem(tabela_dispersao *td, const char *remetente)
         return NULL;
     }
 
-    mensagem **msg = (mensagem**) malloc(sizeof(mensagem) * (tabela_existe(td, remetente)) + sizeof(mensagem*)); //Pensar em como melhorar...
+    mensagem **msg = (mensagem**) malloc(sizeof(mensagem) * (tabela_existe(td, remetente)) + sizeof(mensagem*));
     
     if(msg == NULL){
         return NULL;
@@ -191,9 +191,6 @@ int tabela_esvazia(tabela_dispersao *td)
     return TABDISPERSAO_OK;
 }
 
-
-
-
 unsigned long hash_krm(const char* chave, int tamanho)
 {
 	int c, t = strlen(chave);
@@ -209,8 +206,6 @@ unsigned long hash_krm(const char* chave, int tamanho)
 
     return 0;
 }
-
-
 
 tabela_dispersao* tabela_carrega(char *ficheiro,int tamanho)
 {
