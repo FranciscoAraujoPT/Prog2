@@ -10,10 +10,30 @@
 /* podem criar mais struct que achem necessárias*/
 
 
+/* tabela de dispersao de mensagems baseada em encadeamento */
+
+typedef struct _l_elemento
+{
+	elemento * elem;
+	struct _l_elemento *proximo;
+	struct _l_elemento *anterior;
+
+} l_elemento;
+
+typedef struct 
+{
+	l_elemento *curr;
+ 	l_elemento *inicio;
+	l_elemento *fim;
+
+} destinatarios;
 
 typedef struct
 {
- 		
+	hash_func *hfunc;		/* apontador para a funcao hash_krm*/
+	destinatarios **elementos;	/* vetor de elementos */
+	int tamanho;			/* tamanho do vetor de elementos */
+
 } estrutura;
 
 
